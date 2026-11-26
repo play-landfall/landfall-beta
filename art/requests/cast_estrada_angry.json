@@ -1,0 +1,14 @@
+{
+  "id": "cast_estrada_angry",
+  "kind": "portrait",
+  "size": "square",
+  "subject_in": "this file",
+  "subject": "Samuel Barlow, the same portrait as cast_estrada: same person, same framing, same clothes and light, same screenprint style. Only the expression changes, to angry: jaw set, brows hard down, nostrils flared, looking straight out, about to say something they will not take back.",
+  "card": "speech bubbles and story scenes, any line tagged [[<seat or key>|angry]] (js/speak.js LF.EXPRESSIONS, exprFace in js/ui.js)",
+  "setting": "planet",
+  "officers": [
+    "estrada"
+  ],
+  "notes": "Paint against the approved cast_estrada as the reference, so the face is unmistakably the same person. It is shown small, as a round bubble face (44 to 64 px), so the expression must read at that size. The aged cast_estrada_old_angry versions come later. No hollow version.",
+  "requested": "2026-11-26, barrens branch"
+}

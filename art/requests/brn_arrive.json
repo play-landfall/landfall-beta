@@ -1,0 +1,12 @@
+{
+  "id": "brn_arrive",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "The Ariadne in orbit over a dun and red worn-flat world, and ahead of her, a little higher, a second, older colony ship, dark from end to end, one running light on its hull.",
+  "card": "brn.arrive (js/barrens-crossing.js)",
+  "setting": "ship",
+  "officers": [],
+  "notes": "Barrens Part 1, the Crossing. Screenprint light. No faces needed: the card names the officers, and whoever holds the seat varies. Barrens must look the same in every picture of it from orbit (Lachlan, 2026-11-26: the card and the in-orbit banner showed two different planets): match the arrival film arrival_barren, and use the same planet for brn_board and any later orbit shot.",
+  "requested": "2026-11-26, barrens branch"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "brn_holds",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "The colony council hall at dusk, a long table with three groups facing each other: weathered born-here colonists, newcomers in clean grey, and a few old officers in faded ship jumpsuits. An empty chair at the head.",
+  "card": "brn.holds (js/barrens-end.js)",
+  "setting": "colony",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

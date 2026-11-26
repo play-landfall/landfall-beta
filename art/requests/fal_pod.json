@@ -1,0 +1,12 @@
+{
+  "id": "fal_pod",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A scorched cryo pod half buried in the dun Barrens flats at dawn, smoke rising, the lid open, the watch running toward it with a stretcher.",
+  "card": "fal.pod (js/thread-fallen.js)",
+  "setting": "world",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

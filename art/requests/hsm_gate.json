@@ -1,0 +1,12 @@
+{
+  "id": "hsm_gate",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A colony gate at three in the morning: lamps on the track, a crowd of frightened people with children pressed against the wire, a settlement burning far off on the horizon.",
+  "card": "hsm.gate (js/thread-mimics.js)",
+  "setting": "colony",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

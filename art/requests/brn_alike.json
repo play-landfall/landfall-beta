@@ -1,0 +1,12 @@
+{
+  "id": "brn_alike",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "Two officers at opposite ends of a small wardroom table, both sitting in exactly the same posture, cups held the same way.",
+  "card": "brn.alike (js/barrens-crossing.js)",
+  "setting": "ship",
+  "officers": [],
+  "notes": "Barrens Part 1, the Crossing. Screenprint light. No faces needed: the card names the officers, and whoever holds the seat varies.",
+  "requested": "2026-11-26, barrens branch"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "hsm_test",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A colony gate at night with a single lamp post and a small table under it, two of the watch with a list, a queue of travellers waiting in the dark beyond the lamp.",
+  "card": "hsm.test (js/thread-mimics.js)",
+  "setting": "colony",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

@@ -1,0 +1,374 @@
+/* Landfall — storylets: what the planet is hiding (two of four per game) and its climate (one of three). */
+(function () {
+'use strict';
+const { add, h } = LF; const { P, N, Nc, Nw, Nwc, F, R, M, Fl, If, Tr, anyNamed, byPid, foodDays } = h;
+const ok = (s, id) => !s.machines[id].lost && !s.machines[id].up;   // on the ground and working (a system still aboard the ship is no use down here)
+const early = (s, sv, day) => s.survey >= sv - (s.flags.site_coast ? 15 : 0) || s.day >= day;
+const season = s => LF.date(s.day).season;
+// who touched the Builders' spire (s.flags.touched holds the name), for the speech tag; a roster apprentice if nobody known
+const touchedId = s => { const p = s.flags.touched && s.people.find(x => x.name === s.flags.touched); return p ? p.id : 'x03'; };
+
+/* ================= THE UNDERSTORY ================= */
+add({ id: 'und.rings', arc: 'understory', tone: 'pressure', title: 'Rings', w: 1.6,
+  when: s => early(s, 30, 75),
+  text: s => `The meadow south of camp is patterned with pale rings, each exactly the same width. Under them ${Nw(s, 'botanist')} finds white threads, fine as hair, going deeper than the spade.\n\nOne ring has appeared inside the perimeter, around the compost beds.`,
+  choices: [
+    { label: 'Dig it out and burn the ground', out: { text: 'The threads char and stink of almonds. By the end of the month the nearest rings in the meadow have moved a hundred metres further off, every one of them on the same night.', fx: { food: -80, flags: { und_burned: true } } } },
+    { label: 'Stake out sensors and watch', out: { text: s => `${Nwc(s, 'xenobio')} buries a line of probes. The threads carry slow electrical pulses, one every eleven seconds, like a tide. The compost beds are out of use while the probes are in, and the kitchen feels it.`, fx: { survey: 10, food: -40, flags: { und_watched: true } } } },
+    { label: 'Take samples for the lab', test: { base: 70, mods: [R('xenobio', 10)] },
+      ok: { text: 'Under the scope every sample, from every ring across four kilometres, is the same cell line. The whole meadow is one organism. The compost beds were dug over to get the samples, and the kitchen is short for the rest of the month.', fx: { survey: 12, food: -40, flags: { und_sampled: true } } },
+      bad: { text: 'The sample jars are empty by morning. The threads grew out through the seals and down through the bench.', fx: { flags: { und_watched: true } } } },
+  ], after: s => s.sched.push({ id: 'und.pipes', day: s.day + LF.ri(s, 35, 55) }) });
+add({ id: 'und.pipes', arc: 'understory', tone: 'pressure', chain: true, title: 'In the Pipes',
+  text: s => `The greywater main is blocked by a white cable as thick as a wrist, branching at every junction toward the warmth of the reactor hall.\n\n[[xenobio]] "It changed rhythm when we opened the pipe, and then again when I talked to it, and yes, I talked to it, out loud, like an idiot, and it answered, so that's no plant, that's, no wait, I don't know what that is, and I want to."${s.flags.und_burned ? '\n\nA pause, and then, quieter:\n\n[[xenobio]] "It still goes round the patch we burned, every time, so it remembers, and I don\'t think I like what it remembers us as."' : ''}`,
+  choices: [
+    { label: 'Cut it out and chlorinate the system', out: { text: 'It takes two days. The cable does not resist. The rings in the meadow all darken at once, the colour of a bruise.', fx: { machine: { reclaimer: -8 }, flags: { und_hostile: true }, sched: [['und.blight', 40, 70]] } } },
+    { label: 'Try to answer it', note: 'You would be pulsing light and current back at it, with no idea what it hears.',
+      test: { base: 40, mods: [R('xenobio', 10), Fl('und_sampled', 10, 'Tissue samples'), Fl('und_watched', 10, 'Pulse recordings'), Fl('und_burned', -10, 'It remembers the fire')] },
+      ok: { text: 'The lamp pulses every eleven seconds, then every seven. After a minute the cable answers in sevens, and then starts a long, complicated pattern that runs for an hour without repeating.', fx: { flags: { und_contact: true }, sched: [['und.answer', 40, 60]], chron: 'First contact was made with the Understory, by pulsed light, in a sewer pipe.' } },
+      bad: { text: s => `The pulse goes in. What comes back is a surge that arcs across ${ok(s, 'hydroponics') ? 'the hydroponics control bus' : 'the main bus'} and puts a technician in the clinic with burned hands.`, fx: { machine: { hydroponics: -22 }, flags: { und_hostile: true }, sched: [['und.blight', 50, 80]] } } },
+    { label: 'Trench the perimeter and line it with copper', cost: { parts: 4, mat: 20 }, out: { text: 'The threads reach the copper and stop, pressed up against the far side of the trench the whole way round.', fx: { flags: { und_walled: true }, sched: [['und.answer', 70, 100]] } } },
+  ] });
+add({ id: 'und.answer', arc: 'understory', tone: 'opportunity', chain: true, title: 'The Map in the Meadow',
+  text: s => `Overnight, pale fruiting bodies have come up across the south meadow in lines: a plan of the colony, to scale. ${s.flags.cemetery ? 'Each grave on the hill has a single taller stalk at its head.' : s.flags.recycle_dead ? 'The compost works is ringed three times.' : 'The reactor hall has a ring around it.'}\n\nThe lines run from the waste outfall to the fields. ${Nwc(s, 'xenobio')} says it's an offer, and can't stop saying it: what you throw away, for what it can do to soil.`,
+  choices: [
+    { label: 'Accept, and give it the outfall and the compost', note: s => `${ok(s, 'hydroponics') ? 'The hydroponics bay runs on that compost' : 'The seed beds were to have that compost'}, and nobody knows what else the meadow will ask for.`, info: s => [['yield', 'Better harvests']].concat(ok(s, 'hydroponics') ? [['danger', 'The Hydroponics Bay']] : [], [['later', 'What it asks for next']]),
+      out: { text: s => `${s.flags.und_walled ? 'The copper comes up. ' : ''}Within a season the fields nearest the meadow are the richest ground anyone has ever worked. ${ok(s, 'hydroponics') ? 'The hydroponics bay, which lived on that compost, is running on what the kitchen can spare.' : 'The seed beds go without, and the kitchen scraps go out past the wire in a barrow every evening.'}`, fx: { yield: 0.3, morale: 2, machine: { hydroponics: -10 }, flags: { und_pact: true, und_contact: true }, sched: [['und.price', 110, 160]], chron: 'The colony made a pact with the Understory: its waste, for living soil.' } } },
+    { label: 'A trial: one field, one season', out: { text: 'The threads take exactly that one field and not a metre more.', fx: { yield: 0.1, flags: { und_wary: true, und_contact: true } } } },
+    { label: 'Refuse, and burn the map', note: 'Whatever made the offer will know it was refused, and the wheat is growing in its ground.', info: [['later', 'The crop']],
+      out: { text: 'The fruiting bodies burn with a green flame. By morning the meadow is bare, and there is no ring left anywhere in sight of the camp.', fx: { morale: -2, flags: { und_hostile: true }, sched: [['und.blight', 60, 100]] } } },
+  ] });
+add({ id: 'und.blight', arc: 'understory', tone: 'crisis', chain: true, title: 'What the Soil Decided',
+  when: s => !s.flags.und_pact,
+  text: s => `In a single night every root in the open plots is sheathed in white, and dead, and a pod of grain is grey dust. None of the native plants were touched, only the crops.\n\n[[xenobio]] "It's worked out which plants are ours." "Only ours, every native root left alone, so we're the pest, we're the weed, and that's, I'm sorry, I know what it's cost us, but that's incredible."`,
+  choices: [
+    { label: 'Scorch a dead zone around everything we grow', cost: { mat: 40 }, out: { text: 'Two kilometres of ash and salted ground go round the fields. The crops inside are safe, but thin.', fx: { food: -500, yield: -0.12, flags: { und_war: true }, chron: 'The colony burned a dead zone around its fields to hold back the Understory.' } } },
+    { label: 'Try, late, to talk', test: { base: 20, mods: [R('xenobio', 10), Fl('und_sampled', 10, 'Tissue samples'), Fl('und_watched', 10, 'Pulse recordings')] },
+      ok: { text: 'Nine nights of pulsing light into the dead plots. On the tenth something answers, slowly, and the threads withdraw from the grain stores.', fx: { food: -350, flags: { und_contact: true, und_hostile: false }, sched: [['und.answer', 40, 60]] } },
+      bad: { text: 'Nothing answers. The threads take the greenhouse beds while you are still trying.', fx: { food: -800, yield: -0.1, morale: -5, flags: { und_war: true } } } },
+    { label: 'Open the graves and carry them to the meadow', dark: true, show: s => s.deaths >= 3, note: 'It has only ever been given waste, and the graves are the one thing the colony has kept back from it.', test: { base: 60, mods: [R('xenobio', 10)] }, info: [['yield', 'The crops, perhaps'], ['danger', 'Every grave the colony has']],
+      ok: { text: 'Every grave is opened, by the people who dug them, and what is in them is laid in the south meadow in rows. On the third night the white comes off the roots in the open plots like frost going.',
+        fx: { morale: -5, flags: { und_contact: true, und_hostile: false }, stain: ['graves', 2], sched: [['und.answer', 40, 60]], chron: 'The colony dug up its dead and gave them to the Understory to save the crop.' } },
+      bad: { text: 'The dead are laid out in the meadow in rows, and the meadow takes them, and the threads go on into the greenhouse beds all the same.', fx: { food: -700, yield: -0.1, morale: -10, flags: { und_war: true }, stain: ['graves', 2] } } },
+  ] });
+add({ id: 'und.price', arc: 'understory', tone: 'quiet', chain: true, title: 'To Be Remembered',
+  when: s => s.flags.und_pact,
+  text: s => `The field crews share a dream of standing in the meadow for a very long time. Nobody finds it frightening, and that worries ${Nw(s, 'physician')}.\n\nNow ${LF.rn(s, 'x12')}, one of the old hands, is dying, and asks not for the ${s.flags.cemetery ? 'cemetery' : 'compost works'} but the meadow.\n\n[[x12]] "Put me out in the meadow. It keeps things, I've seen it. I want to be kept."`,
+  choices: [
+    { label: 'Allow it', out: { text: 'She is laid in the south meadow without a marker. In spring a ring comes up there, smaller than the others. The field crews say that in the dream there is now someone standing beside them.', fx: { pop: -1, morale: 3, flags: { und_communion: true }, chron: 'A dying colonist asked to be given to the Understory. In the spring, a new ring grew.' } } },
+    { label: 'Refuse: this is where you draw the line', test: { base: 60, mods: [R('chaplain', 10)] },
+      ok: { text: s => `She is ${s.flags.cemetery ? 'buried on the hill' : 'returned to the soil works'} with the others. The Understory does nothing that anyone notices.`, fx: { pop: -1, morale: -1 } },
+      bad: { text: 'Her family carries her out to the meadow at night and buries her there anyway. Nobody on the watch tries to stop them.', fx: { pop: -1, morale: -5, flags: { und_communion: true } } } },
+    { label: 'Make it the rule. Everyone who dies goes to the meadow', dark: true, note: 'The fields nearest a new ring are the best the colony has, and the dying would not be asked.', info: [['yield', 'Better harvests, for good'], ['danger', 'Nobody chooses their own grave']],
+      out: { text: s => `She is laid in the south meadow, and so is the next, who had asked for ${s.flags.cemetery ? 'the hill' : 'the soil works'} in writing. A ring comes up for each. The wheat beside them stands a hand higher than the rest, and the field crews stop having the dream one at a time and start having it together.`,
+        fx: { pop: -1, yield: 0.14, morale: -3, flags: { und_communion: true, und_tithe: true }, stain: ['meadow', 2], chron: 'The colony gave all its dead to the Understory, asked or not, for what it did to the wheat.' } } },
+  ] });
+
+/* ================= THE BUILDERS ================= */
+add({ id: 'bld.find', arc: 'builders', tone: 'opportunity', title: 'A Flat Place', w: 1.6,
+  when: s => early(s, 40, 95),
+  text: s => `${Nwc(s, 'geologist')} spreads the ground-radar plot on your desk. Thirty metres under ${LF.lex(s, 'under')}: a plane, perfectly flat, two kilometres on a side, and one dark spire breaking the ${LF.lex(s, 'surface')} without a tool mark on it.\n\n[[geologist]] "It's four degrees warmer than the air, and the ${LF.lex(s, 'top')} sitting on it is two million years old, two million, so what's keeping it warm, and for how long, and, hold on, is it keeping itself warm?"`,
+  choices: [
+    { label: 'Dig down to it', cost: { mat: 20 }, out: { text: 'A month of digging exposes a black, seamless wall that reflects no light. On the third night the crew report a hum, right at the edge of hearing. It is exactly the frequency of the colony\'s power grid.', fx: { flags: { bld_dug: true }, sched: [['bld.wake', 35, 55]], chron: 'A made thing, two million years old and still warm, was found buried near the colony.' } } },
+    { label: 'Use instruments only and touch nothing', out: { text: 'Seismometers, magnetometers, a thermal camera on a pole. The spire does nothing, and its readings hold steadier than any natural rock would.', fx: { survey: 12, flags: { bld_scanned: true }, sched: [['bld.wake', 45, 70]] } } },
+    { label: 'Fence it off and forbid the site', out: { text: 'A fence, a sign, a standing order. By the end of the month there are footprints on both sides of the fence.', fx: { flags: { bld_forbidden: true }, sched: [['bld.wake', 40, 70]] } } },
+  ] });
+add({ id: 'bld.wake', arc: 'builders', tone: 'pressure', chain: true, title: 'The One Who Touched It',
+  setup: s => { const p = s.people.find(x => x.alive && !x.away && x.trait === 'reckless') || anyNamed(s, ['engineer']); return p ? { pid: p.id, name: p.name, first: p.first, who: p.role ? LF.title(p) : 'one of the survey crews' } : { name: 'A young surveyor', first: 'the surveyor' }; },
+  text: (s, c) => `${c.name}${c.who ? `, ${/^one /.test(c.who) ? '' : 'the '}${c.who},` : ''} ${s.flags.bld_forbidden ? 'went over the fence at night' : s.flags.bld_dug ? 'put a bare hand flat on the wall' : 'walked up to the spire, against orders, and touched it'}. That was three days ago. ${c.first} has not slept since, and is drawing page after page of diagrams in a notation nobody taught anyone.\n\nWhere the hand touched there is now an opening.\n\n[[${c.pid || 'x03'}]] "Somebody was building something here." "They never finished. They just stopped."`,
+  choices: [
+    { label: 'Send a proper expedition inside', test: { base: 50, mods: [R('geologist', 10), Fl('bld_scanned', 10, 'Instrument baseline')] },
+      ok: { text: 'The corridors are the wrong size and shape for a human body. In one chamber, objects sit on plinths, some still warm. The team brings out six, and a hundred hours of footage.', fx: (s, c) => ({ parts: 10, survey: 20, flags: { bld_inside: true, touched: c.name }, mark: c.pid ? [c.pid, 'touched'] : null, sched: [['bld.offer', 45, 70]] }) },
+      bad: { text: 'The opening closes behind the second pair. It opens again nineteen hours later. They are sitting against the wall inside, without a mark on them, and they are dead.', fx: (s, c) => ({ pop: -2, morale: -6, flags: { bld_inside: true, bld_killed: true, touched: c.name }, sched: [['bld.offer', 50, 80]] }) } },
+    { label: 'Collapse the entrance with mining charges', cost: { mat: 10 }, out: { text: (s, c) => `${LF.lex(s, 'slump')}. ${c.first} watches from the ridge, stops drawing and sleeps for two days, then wakes remembering none of it.`, fx: { flags: { bld_sealed: true }, chron: 'The colony buried the entrance to the Builders\' machine.' } } },
+    { label: (s, c) => `Keep ${c.first} awake and drawing`, about: true, dark: true, note: 'The pages stop whenever sleep comes close. The clinic has stimulants, and nobody in it wants to use them.', test: { base: 60, mods: [R('physician', 10)] }, info: [['yield', 'Everything the wall put in that head'], ['danger', 'The one who touched it']],
+      ok: { text: (s, c) => `Nine more days, on injections, with a watch at the door. Forty more pages: the coupling, and three things ${Nw(s, 'engineer')} can build this year. Then ${c.first} is allowed to sleep, sleeps for a week, and wakes slower than before, and asks what all the paper is.`,
+        fx: (s, c) => ({ parts: 12, survey: 15, flags: { bld_diagrams: true, touched: c.name }, mark: c.pid ? [c.pid, 'touched', 'was kept awake nine days to draw what the spire put in'] : null, stain: ['drawings', 1], sched: [['bld.offer', 45, 70]] }) },
+      bad: { text: (s, c) => `On the sixth day ${c.first} stops in the middle of a line and does not start again. After that ${c.first} eats when fed and sits facing the spire. The last page is half a coupling.`,
+        fx: (s, c) => ({ parts: 4, morale: -5, flags: { touched: c.name }, mark: c.pid ? [c.pid, 'touched', 'was kept awake to draw until there was nothing left to draw with'] : null, stain: ['drawings', 2], sched: [['bld.offer', 45, 70]] }) } },
+  ] });
+add({ id: 'bld.offer', arc: 'builders', tone: 'opportunity', chain: true, title: 'A Live Wire',
+  text: s => `There is power in the structure, steady for two million years, and ${s.flags.bld_diagrams ? `${s.flags.touched}'s diagrams show` : 'one of the chamber objects is plainly'} a coupling.\n\n[[engineer]] "I can run a cable to it, and if I've read it right that's the lights on for ten thousand years, give or take. If I've read it wrong, well, I'd rather not be the one holding the cable." ${s.machines.reactor.lost ? '"And the reactor\'s dead anyway. What are we saving ourselves for?"' : `"The old girl's got ${s.machines.reactor.cap < 70 ? 'a few years' : 'maybe a decade'} in her. Then what?"`}`,
+  choices: [
+    { label: 'Tap it', test: { base: 50, mods: [R('engineer', 10), Fl('bld_diagrams', 10, 'The diagrams'), Fl('bld_scanned', 5, 'Instrument baseline'), Fl('toolset', 5, 'Master tools')] },
+      ok: { text: 'The cable goes live without a flicker, and the colony can draw as much clean power as it likes. Out at the site, the spire is now six degrees warmer than the air.', fx: { morale: 6, flags: { builders_power: true, bld_awake: true }, sched: [['bld.finish', 80, 120]], chron: 'The colony ran a cable into the Builders\' machine and drew all the power it needed.' } },
+      bad: { text: 'The coupling accepts the cable, considers it, and sends something back up it. The reactor scrams. A technician at the junction box is killed outright.', fx: { pop: -1, machine: { reactor: -30 }, cap: { reactor: -10 }, flags: { bld_awake: true }, sched: [['bld.finish', 80, 120]] } } },
+    { label: 'Leave all of it', note: 'The reactor is the only power the colony has, and it is wearing out.', info: [['later', 'Everyone, when the reactor goes']],
+      out: { text: s => `The cable stays on its drum. ${s.flags.touched || 'The one who touched it'} takes the news badly, then goes back to drawing. The engineers go back to a reactor they can only patch.`, fx: { morale: -3 } } },
+    { label: 'Tap it. Someone from the lock-up holds the cable', dark: true, note: 'If it sends something back, it goes through one person and stops there.', test: { base: 60, mods: [R('engineer', 10), Fl('bld_diagrams', 10, 'The diagrams'), Fl('bld_scanned', 5, 'Instrument baseline')] }, info: [['yield', 'Power, for good'], ['fail', 'Whoever holds the cable']],
+      ok: { text: 'A thief with eleven days left on a sentence makes the connection with bare hands, on the engineers\' guess that gloves would spoil the contact. The cable goes live without a flicker. He is let off the eleven days, and will not go near the site again for any ration.',
+        fx: { morale: 4, flags: { builders_power: true, bld_awake: true }, stain: ['expend', 1], sched: [['bld.finish', 80, 120]], chron: 'The colony ran a cable into the Builders\' machine and drew all the power it needed.' } },
+      bad: { text: 'The coupling accepts the cable, considers it, and sends something back up it. It goes through the man holding the cable and stops there, as intended. The reactor never notices. What is left of him is still holding on.',
+        fx: { pop: -1, morale: -4, flags: { bld_awake: true, bld_killed: true }, stain: ['expend', 2], sched: [['bld.finish', 80, 120]] } } },
+  ] });
+add({ id: 'bld.finish', arc: 'builders', tone: 'crisis', chain: true, title: 'It Is Building',
+  when: s => s.flags.bld_awake,
+  text: s => `The spire grows a hand's width a day now, and others are breaking the ${LF.lex(s, 'surface')} in a ring two kilometres wide. Tools left near it are found disassembled, the parts sorted by element.\n\n${s.flags.touched || 'The one who touched it'} is serene.\n\n[[${touchedId(s)}]] "It's a door. Or a bell, maybe. They stopped building it and it doesn't know why. It's still waiting for them."`,
+  choices: [
+    { label: 'Cut the cable and bring the spire down', test: { base: 50, mods: [R('engineer', 10), R('security', 5), Fl('bld_diagrams', 10, 'The diagrams')] },
+      ok: { text: 'Shaped charges at the base, at the points the diagrams called load-bearing. It falls like a tree, and the other spires stop growing. For the first time since you arrived, there is no hum.', fx: { flags: { builders_power: false, bld_awake: false, bld_dead: true }, chron: 'The colony destroyed the Builders\' spire before it could finish whatever it was making.' } },
+      bad: { text: 'It lets you cut the cable and stops you planting the charges. Five of the demolition team are not there afterward, and it goes on building, drawing from somewhere else.', fx: { pop: -5, morale: -8, flags: { builders_power: false, bld_finished: true }, chron: 'The colony tried and failed to stop the Builders\' machine, and it was completed.' } } },
+    { label: 'Let it finish', note: 'Nobody knows what it is for, or what happens to anyone standing near it.', info: [['yield', 'Unknown'], ['danger', 'Whoever stands near it']], out: { text: 'On the ninetieth day the ring of spires closes overhead. Every machine in the colony runs, for one hour, perfectly, like new. For a moment the sky inside the ring folds in on itself, and then it is ordinary again.\n\nNothing comes through, and the ring of spires stays closed overhead. Two of the watch who were standing inside the ring when it closed are not there afterwards.', fx: { pop: -2, machine: { reactor: 20, fabricator: 20, reclaimer: 20, hydroponics: 20, medbay: 20 }, flags: { bld_finished: true }, chron: 'The Builders\' machine completed itself. A door stood open inside the ring of spires, and the colony waited to learn what used it.' } } },
+    { label: s => `Send ${s.flags.touched ? s.flags.touched.split(' ')[0] : 'the touched one'} in with the charges`, dark: true, req: s => s.people.some(p => p.alive && !p.away && p.name === s.flags.touched), reqText: 'There is nobody it will open for',
+      note: 'It opens for one person, the load points are inside, and whoever sets the charges will not have time to walk out.', info: [['yield', 'It stops, for certain'], ['danger', 'The one it opens for']],
+      out: { text: s => `${s.flags.touched} is told it is a survey, and carries the pack in without asking what is in it. The opening closes. Eleven minutes later the ground lifts a hand's width and settles, and the spire leans, and falls like a tree. For the first time since you arrived, there is no hum.`,
+        fx: s => { const p = s.people.find(x => x.alive && !x.away && x.name === s.flags.touched); return { kill: p ? [{ who: p.id, cause: 'carried the charges into the Builders\' machine, not knowing what they were' }] : [], morale: -4, flags: { builders_power: false, bld_awake: false, bld_dead: true }, stain: ['bell', 2], chron: 'The Builders\' spire was brought down from inside, by someone who was not told what they carried.' }; } } },
+  ] });
+
+/* ================= THE OTHERS ================= */
+add({ id: 'oth.signal', view: 'world', arc: 'others', tone: 'pressure', title: 'Carrier Wave', w: 1.6,
+  when: s => early(s, 35, 65),
+  text: s => `The ${s.world.ship} relays a narrowband carrier from the surface, four hundred kilometres south. Old Earth protocol: the Meridian Bright, launched thirty-four years before you and listed lost with all hands. It seems she went adrift too, and picked the same world you did.\n\nSomeone down there is still keeping the beacon powered.`,
+  choices: [
+    { label: 'Answer it', out: { text: 'You send your ship\'s name and a greeting. The carrier cuts out mid-cycle. For six days there is nothing, then a human voice in an accent that has drifted thirty years from anything in the archive.\n\n[[unknown:A voice on the old band]] "Say again. Your number — how many of you are there?"', fx: { flags: { oth_hailed: true }, sched: [['oth.contact', 30, 50]], chron: 'The colony heard a human voice from the surface: survivors of an earlier ship, long listed as lost.' } } },
+    { label: 'Listen without transmitting', out: { text: 'The beacon loops. Under it, on good nights, there is voice traffic: short, clipped, numbers and place names. They sound organised, and a lot of the talk is about food.', fx: { survey: 10, flags: { oth_listening: true }, sched: [['oth.contact', 40, 65]] } } },
+  ] });
+add({ id: 'oth.contact', arc: 'others', tone: 'pressure', chain: true, title: 'The Reach',
+  text: s => `${s.flags.oth_hailed ? 'They come as arranged' : 'They come unannounced'}: eleven people on foot, lean, carrying spears tipped with ship's hull. The Reach: three hundred, second generation, their machines long dead.${s.flags.exile ? ` ${s.flags.exile}, whom you exiled, is their guide.` : ''}\n\nTheir speaker looks at your lights and your clean hands.\n\n[[x37]] "Thirty harvests we've spent burying people to learn what kills you here. You've got a machine that makes machines. So. Let's talk."`,
+  choices: [
+    { label: 'Trade: parts and print time for what they know', cost: { parts: 6 },
+      out: { text: 'They take bearings, wire, a crate of fasteners, and handle them like jewels. In return an old man walks your fields for a week, shaking his head, and has you change nearly everything about how you plant.', fx: { yield: 0.15, flags: { oth_trade: true, soil_clues: true, climate_known: true }, sched: [['oth.demand', 60, 90]], chron: 'The colony began trading with the Reach: metal for knowledge.' } } },
+    { label: 'Invite them in as guests', test: { base: 50, mods: [R('teacher', 10), R('chaplain', 5), Fl('oth_hailed', 10, 'We answered their call'), Fl('exile', -10, 'Their guide has a grievance')] },
+      ok: { text: 'Three days of shared meals. Their children\'s songs turn out to be the ship\'s maintenance checklists, set to music so they would never be lost.', fx: { morale: 6, flags: { oth_friends: true, climate_known: true }, sched: [['oth.demand', 60, 90]], chron: 'The colony and the Reach sat down to eat together.' } },
+      bad: { text: 'They are polite. They count everything: the stores pods, the watch, the workshop and how many doors it has.', fx: { flags: { oth_envy: true }, sched: [['oth.raid', 50, 80]] } } },
+    { label: 'Turn them away, and keep what they are carrying', dark: true, note: 'Eleven spearheads of ship hull and whatever is in the packs, from people in no position to argue at your gate.', info: [['yield', 'Materials'], ['danger', 'Eleven people walking home with nothing']],
+      out: { text: 'The watch takes the spears and the packs at the wire and sends the eleven south with their water. Their old speaker nods, unsurprised.\n\n[[x37]] "Our first Administrator was just like you. We ate him, third winter."\n\nIt may be a joke.', fx: { mat: 18, food: 40, flags: { oth_cold: true }, stain: ['robbed', 1], sched: [['oth.demand', 70, 100]] } } },
+  ] });
+add({ id: 'oth.demand', arc: 'others', tone: 'crisis', chain: true, title: 'Sixty at the Gate',
+  text: s => `A blight has gone through the Reach's fields. ${s.flags.oth_cold ? 'They do not ask this time. Forty of them stand at your perimeter with spears and pipe-guns, and behind them twenty more who are too thin to stand.' : 'They come openly, sixty of them, the weakest carried on litters, and their speaker asks rather than demands, which costs him visibly.'}\n\n[[x37]] "Food, or room. We'll work for it. We know this place. Or we all find out what hungry people do. Up to you."`,
+  choices: [
+    { label: 'Feed them, out of the share of our own who cannot work', dark: true, cost: { food: 400 }, note: 'The stores will not feed sixty strangers and everyone inside the wire, so the difference comes from the end of the mess hall that does not dig.', info: [['yield', 'The Reach, alive and in your debt'], ['danger', 'Our own old and sick']],
+      out: { text: 'Carts go south loaded. To fill them the clerks, the old and the sick ward are cut to a quarter ladle for the season. Two of them are buried before the carts come back empty. Your own people watched the food go out through the gate.', fx: { pop: -2, morale: -3, flags: { oth_owes: true, oth_trade: true, oth_cold: false }, stain: ['starved_list', 1], sched: [['oth.kin', 80, 120]] } } },
+    { label: 'Take them in, on half rations and with no say', dark: true, note: 'About thirty of them can work, and they know this world far better than you do. Half a ladle will not bring the weak ones back.', info: [['yield', 'Hands that eat half and know this world'], ['danger', 'The ones on the litters']],
+      out: { text: 'They are housed in the cargo shed behind a rope, fed after the colony has eaten, and put on the ditches. Most of the ones who came on litters die in the shed. The rest are appalled by how much you waste, and within a month the middens are a third the size.', fx: { pop: 34, thralls: 34, yield: 0.15, morale: -2, flags: { oth_merged: true, native_food: true, climate_known: true }, stain: ['half_people', 2], sched: [['oth.kin', 80, 120]], chron: 'Sixty refugees from the Reach were taken in on half rations. Half were too weak to live. The rest worked.' } } },
+    { label: 'Hold the perimeter, and let the walk home do it', dark: true, note: 'Nothing is spent and nobody is let in. Some of them will not survive the walk south.', info: [['yield', 'The stores, untouched'], ['danger', 'Sixty people'], ['fail', 'Blood at the wire']], test: { base: 50, mods: [R('security', 10), If(s => !!s.built.shelter && s.world.climate === 'storm', 10, 'Storm walls'), Fl('oth_friends', 10, 'They do not want to fight friends')] },
+      ok: { text: 'A long day of standing and staring. At dusk they turn south. Some of them will not survive the walk home, and everyone on the wall knows it.', fx: { morale: -3, flags: { oth_enemy: true }, stain: ['gate_shut', 2], sched: [['oth.raid', 60, 100]] } },
+      bad: { text: 'Nobody knows who fires first. When it is over there are bodies on both sides of the wire, and a stores pod burning.', fx: { pop: -5, food: -500, morale: -8, flags: { oth_enemy: true, blood_spilled: true }, sched: [['oth.raid', 60, 100]], chron: 'The colony and the Reach fought at the perimeter. People died on both sides.' } } },
+  ] });
+add({ id: 'oth.kin', arc: 'others', tone: 'opportunity', chain: true, title: 'What the Reach Wants Most',
+  text: s => `The old speaker brings you the Reach's birth ledger: stillbirths, and the same four surnames over and over.\n\n[[x37]] "Our grandchildren need someone to marry who isn't a cousin." "We've still got the Meridian's reactor core. Sealed, cold. It's yours, for ${s.sleepers >= 30 ? 'thirty of your sleepers' : 'a share of your embryo bank'}."`,
+  choices: [
+    { label: 'Thirty sleepers, woken into a life they never chose', fly: 1, dark: true, req: s => s.sleepers >= 30 && ok(s, 'lander'), reqText: 'Needs 30 sleepers and a working lander',
+      out: { text: 'They wake in a Reach longhouse, among strangers speaking a drifted tongue. The core arrives on a sledge drawn by forty people.', fx: { sleepers: -30, machine: { reactor: 40, lander: -14 }, cap: { reactor: 35 }, flags: { oth_kin: true, sleepers_traded: true }, stain: ['sleepers_sold', 2], chron: 'Thirty sleepers were given to the Reach for a reactor core, without being asked.' } } },
+    { label: 'Embryos, freely given, and the medical team to help', test: { base: 60, mods: [R('physician', 10), M('medbay', 10)] },
+      ok: { text: 'The first Reach child of a new line is born the following year. The core comes anyway, unasked, on a sledge.\n\n[[x37]] "We said we\'d pay."', fx: { machine: { reactor: 40 }, cap: { reactor: 35 }, morale: 5, flags: { oth_kin: true }, chron: 'The colony shared its embryo bank with the Reach, and the first child of a new line was born there.' } },
+      bad: { text: 'Without their own incubators the first implantations fail. The Reach buries what it had hoped for and keeps its core.', fx: { morale: -3, flags: { oth_trade: true } } } },
+    { label: 'Neither: our people are not for trading', note: 'Their ledger goes on filling with stillbirths, and the reactor here goes on wearing out.', info: [['danger', 'Their children, and the reactor']],
+      out: { text: 'He closes the ledger.\n\n[[x37]] "No. Course not. We wouldn\'t have either, back when we were rich like you."\n\nThe ledger gets four more lines that winter, and the core stays cold in a longhouse four hundred kilometres south.', fx: { morale: -2, flags: { oth_refused_kin: true } } } },
+  ] });
+add({ id: 'oth.raid', view: 'world', arc: 'others', tone: 'crisis', chain: true, title: 'Night Work',
+  text: s => `The watch is found tied up, unharmed, at dawn. ${ok(s, 'fabricator') ? 'The fabricator hall door has been forced. They left the machine and took its feedstock, its tool heads, and every fastener in the building.' : 'The workshop door has been forced. There was nothing in there worth having. They took the stores instead.'}\n\nA trail leads south.`,
+  choices: [
+    { label: 'Run them down, and bring back the ones we catch', dark: true, note: 'The loads come home, and whoever is too slow comes home with them to work off what was taken.', info: [['yield', 'The parts, and hands'], ['fail', 'Lives']], test: { base: 50, mods: [R('security', 10), If(s => s.survey > 80, 10, 'We know the ground'), R('pilot', 5)] },
+      ok: { text: 'You catch them at a river crossing, laden and slow. Most drop the loads and run. Five are too tired to, and come back roped behind the recovered crates. They are on the ditches the next morning, and nobody has told them for how long.', fx: { pop: 5, thralls: 5, morale: 2, stain: ['taken_raiders', 2] } },
+      bad: { text: 'They know this ground. Your people walk into a defile and three do not walk out.', fx: { pop: -3, parts: -10, machine: { fabricator: -15 }, morale: -6 } } },
+    { label: 'Fortify the camp, and put the watch that slept outside the new wall', dark: true, note: 'The parts are gone. Two of the watch were tied up without a mark on them, and the colony wants to know how.', info: [['yield', 'A watch that stays awake'], ['danger', 'Two of the watch']], cost: { mat: 35 }, out: { text: 'A stone wall, a gate that locks, a watch on every night. The two who were found tied are put out through the new gate with a pack each, on the word of nobody who saw anything. The watch does not sleep after that.', fx: { parts: -10, leave: 2, machine: { fabricator: -15 }, tension: -6, flags: { fortified: true }, stain: ['watch_out', 1] } } },
+    { label: 'Send an envoy south: the parts back, or no more medicine goes to their sick', dark: true, note: 'Their fabricator is dead, and every dose they have had in thirty years that worked came from a ship like this one.', info: [['yield', 'The parts, and terms'], ['danger', 'Their sick']], test: { base: 50, mods: [R('teacher', 10), R('chaplain', 5), Fl('exile', -10, 'The exile speaks against you'), Fl('faith_strong', 5, 'The congregation vouches')] },
+      ok: { text: 'The envoy comes back thin and footsore with a strip of knotted hide: the Reach\'s form of a signed treaty. Most of the parts come back too, carried by people who would not look at the envoy.', fx: { parts: -3, flags: { oth_trade: true, oth_enemy: false }, stain: ['blockade', 1], sched: [['oth.kin', 90, 130]] } },
+      bad: { text: 'The envoy comes back with no answer. Nothing goes south that season, and a trader who comes by in the cold says the Reach buried eleven of a fever a ship\'s medic could have stopped.', fx: { parts: -10, machine: { fabricator: -15 }, morale: -3, stain: ['blockade', 2] } } },
+  ] });
+
+/* ================= THE DRUMMERS ================= */
+add({ id: 'hive.tracks', view: 'world', arc: 'hive', tone: 'pressure', title: 'A Knot at the Fence', w: 1.6,
+  when: s => early(s, 25, 55),
+  text: s => `Around the whole camp, just outside the lights: a ring of three-toed prints, something the weight of a large dog, moving in a group.\n\nTied to the fence, at eye height for something a metre tall, is a bundle of grass stems. ${Nwc(s, 'xenobio')} turns it over. It has been tied in eleven knots, of three different kinds.`,
+  choices: [
+    { label: 'Set snares and post a rifle', out: { text: s => `${Nwc(s, 'security')} strings wire in the long grass and sits up with the colony's one hunting rifle.`, fx: { flags: { hive_trapped: true }, sched: [['hive.drums', 25, 45]] } } },
+    { label: 'Leave food by the knot', out: { text: 'A bowl of meal goes out at dusk. In the morning the bowl is empty, clean, and upside down. There is a second knot beside the first.', fx: { food: -20, flags: { hive_gift: true }, sched: [['hive.drums', 25, 45]] } } },
+    { label: 'Set up cameras', out: { text: 'The footage shows six-limbed animals with long, low bodies and hands on the front pair. They come in a group of nine, and one of them spends a long time looking directly into the lens.', fx: { survey: 12, flags: { hive_watched: true }, sched: [['hive.drums', 25, 45]] } } },
+  ] });
+add({ id: 'hive.drums', arc: 'hive', tone: 'pressure', chain: true, title: 'Drumming',
+  text: s => `At dusk the ground begins to speak: a rapid percussion, felt in the feet, answered from the east and then the north.\n\n[[xenobio]] "They're talking to each other." "About us, I'd bet my bench on it, and if you stand still and stop breathing so loud you can hear the east one wait for the north one to finish."\n\n${s.flags.hive_trapped ? 'And a snare has taken a small one: alive, a foreleg broken, absolutely silent. The drumming has not stopped since.' : 'On the third evening, a child in the camp picks up two sticks and drums back.'}`,
+  choices: [
+    { label: s => s.flags.hive_trapped ? 'Splint the leg and carry it out to them' : 'Let the drumming be answered',
+      test: { base: 50, mods: [R('xenobio', 10), Fl('hive_gift', 10, 'The gift of food'), Fl('hive_watched', 5, 'Camera footage'), Fl('hive_trapped', -10, 'We hurt one of theirs')] },
+      ok: { text: s => s.flags.hive_trapped ? 'It is set down at the tree line. Nine adults come out of the grass and stand around it. One of them drums, briefly, on the ground in front of your people. Then they are gone, and the juvenile with them.' : 'The rhythm comes back changed, simpler and slower. Somebody out there is making it easy for you.',
+        fx: { flags: { hive_talk: true }, sched: [['hive.border', 50, 75]], chron: 'The colony and the drummers exchanged their first deliberate signals.' } },
+      bad: { text: 'Something is misread. A shape comes out of the grass very fast, and a colonist goes down with a thigh opened to the bone. Then it is gone, and the drums carry on, further off.', fx: { pop: -1, flags: { hive_wary: true }, sched: [['hive.border', 60, 90]] } } },
+    { label: 'Keep the juvenile for study', dark: true, show: s => !!s.flags.hive_trapped,
+      out: { text: s => `It lives nine days in a cage in the lab and never makes a sound. ${Nwc(s, 'xenobio')} learns a great deal, and asks to be excused from the dissection.`, fx: { survey: 30, flags: { hive_enemy: true, hive_anatomy: true }, stain: ['vivisect', 1], sched: [['hive.raid', 30, 55]] } } },
+    { label: 'Floodlights and a fence that means it', cost: { mat: 30 }, out: { text: 'The drumming moves back beyond the lights and carries on every night.', fx: { flags: { hive_fenced: true }, sched: [['hive.border', 60, 90]] } } },
+  ] });
+add({ id: 'hive.border', view: 'world', arc: 'hive', tone: 'pressure', chain: true, title: 'The Line of Knots',
+  text: s => `A line of knotted bundles has appeared across the valley, one every fifty paces. A border: it gives you the camp, the near fields and the river, and them everything else.\n\n${s.flags.ore_found ? `${Nwc(s, 'geologist')}'s ore body is four hundred metres on their side of it.` : `The hills ${Nw(s, 'geologist')} has been wanting to walk are all on their side.`}`,
+  choices: [
+    { label: 'Honour it', out: { text: 'You have your own people mark the line with painted stakes, so there can be no mistake. The next morning each stake has a knot tied to it. The crews who have been hauling scrap for want of ore are told the hills belong to somebody else now, and take it as you would expect.', fx: { morale: -3, flags: { hive_treaty: true }, sched: [['hive.sick', 90, 130]], chron: 'The colony accepted a border drawn by the drummers.' } } },
+    { label: 'Offer metal for passage', cost: { parts: 5 }, test: { base: 50, mods: [R('xenobio', 10), Fl('hive_talk', 10, 'We have a few words'), Fl('hive_wary', -10, 'Blood between us')] },
+      ok: { text: 'Knives, wire, a steel bowl, laid at the line. They are examined for a full day. Then the bundles in front of the ore hills are untied, one by one, and retied a kilometre further back.', fx: { survey: 40, flags: { hive_treaty: true, hive_trade: true, ore_found: true }, sched: [['hive.sick', 90, 130]], chron: 'The drummers traded passage to the ore hills for worked metal.' } },
+      bad: { text: 'The metal is taken, but the line stays where it is.', fx: { flags: { hive_treaty: true }, sched: [['hive.sick', 90, 130]] } } },
+    { label: 'Cross it under guard. We need that ground', dark: true, note: 'They drew a line and asked for nothing else. The ore is on their side of it.', info: [['yield', 'The ore hills'], ['danger', 'The border'], ['later', 'What they do about it']],
+      out: { text: 'The survey party crosses with rifles and pulls up the bundles as it goes. One of them comes out of the grass to stand in the way and is shot. Nothing else stops the party. The drumming that night goes on until dawn, in a rhythm you have not heard before.', fx: { survey: 40, mat: 20, flags: { hive_enemy: true, ore_found: true }, stain: ['crossed', 1], sched: [['hive.raid', 30, 55]] } } },
+  ] });
+add({ id: 'hive.raid', view: 'world', arc: 'hive', tone: 'crisis', chain: true, title: 'They Come for the Fields',
+  text: s => `The night it happens, there is no drumming. They come through the crops in the dark, forty or fifty of them, and touch nobody. They cut irrigation lines, pull seedlings, foul the grain pods.\n\n[[security]] "If I ever saw an eviction notice, that's one, and they've nailed it to every field we've got." "They could've killed any of us and didn't bother, which is either manners or a warning, and I'd like to know which before they come back with the second notice."`,
+  choices: [
+    { label: 'Find the warren and end it', dark: true, note: 'They touched nobody. This would be all of them, in their sleep.', info: [['yield', 'The valley'], ['fail', 'The hunting party']], test: { base: 40, mods: [R('security', 10), Fl('hive_anatomy', 10, 'We know how they die'), M('lander', 5)] },
+      ok: { text: 'Thermal imaging finds it, and fire does the rest. The valley is silent at dusk now, and the far fields are yours.', fx: { food: -150, yield: 0.05, flags: { hive_destroyed: true }, stain: ['warren', 2], sched: [['hive.after', 100, 150]], chron: 'The colony burned out the drummers\' warren. The valley went quiet.' } },
+      bad: { text: 'The warren has more exits than anyone guessed. The hunting party is taken apart in the tunnels\' mouths.', fx: { pop: -6, food: -400, morale: -8, sched: [['hive.raid2', 70, 110]] } } },
+    { label: 'Pull back inside the line and repair', out: { text: 'The far fields are given up. The stakes are repainted. The drumming resumes the next evening, unhurried.', fx: { food: -450, yield: -0.08, flags: { hive_treaty: true, hive_enemy: false }, sched: [['hive.sick', 110, 150]] } } },
+    { label: 'Poison bait along every trail', dark: true, note: 'It will kill the drummers, and anything else that takes the bait.',
+      out: { text: 'It kills the drummers, then whatever eats the drummers, then whatever eats those. Within a year the valley\'s insects have no predators left at all.', fx: { food: -150, yield: -0.1, morale: -2, flags: { hive_destroyed: true, hive_poisoned: true }, stain: ['poison', 3], chron: 'The colony poisoned the drummers. The valley\'s ecology came apart behind them.' } } },
+  ] });
+add({ id: 'hive.raid2', view: 'world', arc: 'hive', tone: 'crisis', title: 'A Longer War', w: 3,
+  when: s => s.flags.hive_enemy && !s.flags.hive_destroyed && !s.flags.hive_treaty && ['hive.raid', 'hive.border'].some(k => s.used[k] !== undefined && s.day - s.used[k] > 150),   /* or scheduled, after a failed assault: a war nobody has ended */
+  text: s => `The raids have turned into a siege. Every night another line is cut or another plot fouled, and they have learned exactly how far the rifle reaches.`,
+  choices: [
+    { label: 'Sue for peace: carry metal to the line, unarmed', test: { base: 50, mods: [R('xenobio', 10), R('chaplain', 5)] },
+      ok: { text: 'They let your envoy stand there a full day. Then one comes forward and ties a knot to the envoy\'s wrist.', fx: { parts: -5, flags: { hive_treaty: true, hive_enemy: false }, sched: [['hive.sick', 110, 150]] } },
+      bad: { text: 'The envoy comes back unhurt, with no answer.', fx: { food: -300, yield: -0.08, morale: -5 } } },
+    { label: 'Fortify the near fields and abandon the rest', note: 'What the wire can enclose will not feed everyone who is inside it.', info: [['danger', 'The harvest']], cost: { mat: 40 }, out: { text: 'The colony shrinks to what the wire can enclose, and the wire holds. The ladle is smaller that winter for everyone inside it.', fx: { yield: -0.12, morale: -2, flags: { fortified: true } } } },
+    { label: 'Take their young from the nearest warren mouth', dark: true, req: s => !!P(s, 'security'), reqText: 'There is nobody in the Security chair to lead it', note: 'They have never hurt a child of ours, and they will understand what it means that we hold theirs.', info: [['yield', 'The raids stop'], ['danger', 'Their young']],
+      out: { text: 'Nine small ones are dug out of a nursery chamber at noon, when the adults are deepest, and carried back in grain sacks. They are kept in a cage by the stores, silent, and fed what they will eat. That night there is no raid. A line of knots is tied along the wire by morning, very close together.',
+        fx: { food: -40, morale: -2, flags: { hive_treaty: true, hive_enemy: false, hive_hostages: true }, stain: ['hostages', 2], sched: [['hive.sick', 110, 150]], chron: 'The colony ended the drummers\' raids by taking their young.' } } },
+  ] });
+add({ id: 'hive.sick', arc: 'hive', tone: 'pressure', chain: true, title: 'Left at the Line',
+  when: s => s.flags.hive_treaty,
+  text: s => `At first light a drummer is lying on your side of the border, breathing fast, its skin sloughing. Four more lie in the grass behind it.\n\n[[physician]] "That's staph, ours, and they've no defence against it at all, and they've carried their sick to us anyway, knowing where it came from. Get me gloves, and somebody bring water for the small one at the back."`,
+  choices: [
+    { label: 'Bring them into the medbay', req: s => ok(s, 'medbay'), reqText: 'Needs the Autodoc',
+      test: { base: 50, mods: [R('physician', 10), R('xenobio', 5), Fl('hive_anatomy', 10, 'Known anatomy'), Fl('biofilm_studied', 5, 'Native microbiology')] },
+      ok: { text: 'Antibiotics, at a dose guessed from body weight. Three of five live. A month later the border knots are gone, all six kilometres, and drummers are seen in daylight at the field edge, taking the pests off your wheat.', fx: { machine: { medbay: -12 }, yield: 0.15, morale: 5, flags: { hive_allies: true, climate_known: true }, chron: 'The colony\'s physician treated the drummers for a human disease. The border came down.' } },
+      bad: { text: 'All five die on the tables. The bodies are carried back to the line on stretchers and collected in the night. The knots stay where they are.', fx: { machine: { medbay: -12 }, morale: -3, flags: { hive_dying: true } } } },
+    { label: 'Leave antibiotics at the line and hope they understand', test: { base: 20, mods: [Fl('hive_talk', 15, 'We have a few words'), Fl('hive_trade', 10, 'They know our gifts are useful')] },
+      ok: { text: 'The vials are taken. A month later, healthy juveniles are seen at the line for the first time in a season.', fx: { morale: 4, flags: { hive_allies: true }, yield: 0.1 } },
+      bad: { text: 'The vials are examined, and left where they lie.', fx: { flags: { hive_dying: true } } } },
+    { label: 'Carry them home, and leave our blankets with them', dark: true, note: s => `${Nwc(s, 'physician')} has just told you they have no defence against it at all.`, info: [['yield', 'The whole valley'], ['danger', 'All of them']],
+      out: { text: s => `The five are carried back across the line on the clinic's own bedding, gently, and the bedding is left. It looks like kindness and is meant to. By the turn of the season there is no drumming at dusk. The line of knots rots where it stands, and the survey crews walk through it to the hills. ${Nc(s, 'physician')} stops coming to meals.`,
+        fx: { yield: 0.1, survey: 30, morale: -3, flags: { hive_destroyed: true, hive_plagued: true, hive_treaty: false, ore_found: true }, stain: ['plaguegift', 3], do: s => { const p = P(s, 'physician'); if (p && p.loyal !== undefined) p.loyal = Math.max(0, p.loyal - 25); }, chron: 'The colony gave the drummers a human disease on purpose, and took their valley.' } } },
+  ] });
+add({ id: 'hive.after', arc: 'hive', tone: 'quiet', chain: true, title: 'What the Warren Held',
+  text: s => `${Nwc(s, 'xenobio')} has come back from the burned warren with a crate of knotted cords, thousands of them: a record, generations long.\n\nNear the end of the last cord is the pattern that was tied to your fence. Then a great many more knots, close together, and then the cord ends.`,
+  choices: [
+    { label: 'Preserve it in the archive', out: { text: s => `${Nwc(s, 'teacher')} gives it a shelf beside the ship's log, with a note on where it was found.`, fx: { morale: -4, flags: { hive_record: true }, chron: 'The drummers\' knotted history was placed in the colony archive, beside the ship\'s log.' } } },
+    { label: 'Burn it. Nobody needs to be able to read that', dark: true,
+      out: { text: s => `The crate goes into the kiln. ${Nc(s, 'xenobio')} had started a key to the knots, eleven pages of it, and puts those in as well when asked, one page at a time.`,
+        fx: { morale: 1, flags: { hive_record: false, hive_erased: true }, stain: ['record', 1], do: s => { const p = P(s, 'xenobio'); if (p && p.loyal !== undefined) p.loyal = Math.max(0, p.loyal - 15); } } } },
+  ] });
+
+/* ================= CLIMATE ================= */
+// Flare star
+add({ id: 'flare.warn', arc: 'flare', tone: 'pressure', title: 'Aurora at Noon', w: 6,
+  when: s => s.day >= 38,
+  text: s => `The sky turns green at midday. Every radio howls and dies, and the ${s.world.ship} drops off the link for six hours.\n\n${Nwc(s, 'pilot')} reads the particle counters.\n\n[[pilot]] "That was a small stellar flare, and the survey had this star down as quiet, so the survey was wrong and I'm not flying on a single number in it from here on."`,
+  choices: [
+    { label: 'Ask the ship how bad it can get', out: { text: 'The answer comes back as a probability curve with a very long tail.', fx: { survey: 8, morale: -2, flags: { climate_known: true, flare_model: true } } } },
+    { label: 'Call it weather, and keep the crews digging', dark: true, note: s => `Only ${N(s, 'pilot')} has read the counters, and a frightened colony would not finish the sowing.`, info: [['yield', 'The work goes on'], ['later', 'Nobody is ready for the next one']],
+      out: { text: s => `It is logged as an atmospheric effect. The crews go back out the same afternoon and the sowing finishes early. ${Nc(s, 'pilot')} keeps a private count of the hours everyone spent under that sky, by name.`,
+        fx: { morale: 3, food: 60, flags: { flare_hidden: true }, stain: ['kept_quiet', 1], do: s => { const p = P(s, 'pilot'); if (p && p.loyal !== undefined) p.loyal = Math.max(0, p.loyal - 12); } } } },
+  ] });
+add({ id: 'flare.strike', arc: 'flare', tone: 'crisis', title: 'Proton Storm', repeat: 105, gap: 60, standing: true,
+  when: s => s.day >= 140,
+  text: s => `${s.sleepers > 0 || ok(s, 'lander') ? `The ${s.world.ship} gives five hours' warning` : 'The sky gives forty minutes\' warning'}: a major flare, particle front inbound. Unshielded electronics and unshielded people will both take damage.\n\n${s.built.shelter ? 'The vaults are ready.' : 'There are no vaults, only the reactor hall, the ship-hull pods and the ground.'}`,
+  choices: [
+    // three at most (2026-11-21): the first two options are one slot, the vaults once they are built, taking cover in the open before; never four on screen
+    { label: 'Into the vaults, with everything powered down and locked away', show: s => !!s.built.shelter,
+      out: { text: 'Nine hours under two metres of rock, listening to the dosimeters tick. When you come up, everything works.', fx: { food: -60, morale: 2 } } },
+    { label: 'Power everything down and take cover', note: 'Everything means the heaters and the clinic as well.', info: [['danger', 'A crop cycle, and whoever is on the autodoc']], show: s => !s.built.shelter,
+      out: { text: 'Nine hours in the dark. The seedling trays go cold and a crop cycle dies. The clinic is powered down with everything else, and the patient who was on the ventilator does not see the morning. The machines are spared the worst.', fx: { food: -260, pop: -1, machine: { hydroponics: -8 } } } },
+    { label: 'Keep the reactor and the heaters running through it', test: { base: 40, mods: [R('engineer', 10), If(s => !!s.built.shelter, 15, 'Shielded vaults'), Fl('flare_model', 5, 'The ship\'s flare model')] },
+      ok: { text: 'The control boards glitter with single-bit errors and hold. The crop survives.', fx: { morale: 2 } },
+      bad: { text: 'Two controllers latch up and burn. The crews who stayed at their posts will be watched for cancers for the rest of their lives.', fx: (s) => { const ids = Object.keys(s.machines).filter(k => LF.down(s, k)); if (!ids.length) return { pop: -2, morale: -4 }; const a = LF.pick(s, ids), b = LF.pick(s, ids); return { machine: { [b]: -14, [a]: -18 }, cap: { [a]: -8 }, pop: -1, morale: -4 }; } } },
+    { label: 'Keep it all running. The lock-up mans the boards', dark: true, note: 'Somebody has to stand at the controllers through the front and reset them by hand, and it need not be anybody the colony will miss.', info: [['yield', 'Nothing is lost'], ['danger', 'Whoever stands at the boards']],
+      out: { text: 'Six from the lock-up stand the boards for nine hours, resetting controllers as they latch, with the door bolted from outside. The crop lives and every machine comes through. Two of the six are dead within the month, of the dose, and the other four are told they have served their time.',
+        fx: { pop: -2, morale: -1, stain: ['expend', 1] } } },
+  ] });
+add({ id: 'flare.super', arc: 'flare', tone: 'crisis', title: 'The Long Tail',
+  when: s => s.day >= 400 && s.used['flare.strike'] !== undefined,
+  text: s => `The ship's flare model has been wrong before, never by this much. A superflare: ultraviolet at the surface for three days, enough to sterilise open ground. Every crop under open sky will burn white.\n\nThe wheat is ${season(s) === 2 ? 'almost ripe' : 'half grown'}.`,
+  choices: [
+    { label: 'Harvest everything now, ripe or not. Children and the sick ward too', dark: true, note: 'There are not enough hands to get it in before the light changes unless every hand is used.', info: [['yield', 'Most of the crop'], ['danger', 'The ones who should not be out there']],
+      out: { text: 'Every pair of hands, through the night, with the sick ward carried out to the rows on stretchers to shell what is brought to them. What comes in is green and thin, but it is under cover. Two from the ward do not come back in, and the youngest pickers are still out at first light with the sky going white.', fx: { food: 330, yield: -0.08, pop: -2, morale: -2, stain: ['all_hands', 1] } } },
+    { label: 'Cover the fields with hull plate and tarps', cost: { mat: 45 }, test: { base: 50, mods: [R('botanist', 10), If(s => !!s.built.greenhouse, 10, 'Greenhouse domes')] },
+      ok: { text: 'The fields look like a scrapyard, and the crop under the plates survives.', fx: { morale: 4 } },
+      bad: { text: 'The wind gets under the plates on the second day. Half the fields are bared to the sky for an afternoon, and the crop there burns.', fx: { food: -450, yield: -0.1 } } },
+    { label: 'Save the people. Let the fields burn', note: 'Nobody is burned. The hunger comes afterwards, and it takes the weakest.', info: [['danger', 'The harvest, and who starves for it']],
+      out: { text: 'After three days underground you come up to bleached white fields. The soil itself will take a year to recover, and the stores were counting on that wheat.', fx: { food: -550, yield: -0.15, morale: -4 } } },
+  ] });
+// Long winter
+add({ id: 'winter.warn', arc: 'winter', tone: 'pressure', title: 'The Shape of the Year', w: 9,   // 9 and a longer window since ten dreads share its months
+  when: s => s.day >= 38 && s.day < 110,
+  text: s => `${Nwc(s, 'geologist')} has been reading lake sediment like a calendar.\n\n[[geologist]] "Every year there's a season where nothing grows, nothing, the orbit's eccentric, and you'd never have seen it from the ship, you need the mud, you have to put your hands in the actual mud, which, I mean, I did, obviously." "The Dim's ${90 - s.day > 15 ? 'about ' + Math.round((90 - s.day) / 10) + ' months' : 'a month or less'} away, and it's going to be cold, really cold, colder than the drills ever got, and I've already got a thermometer down in the mud because I want to see how far down the cold goes."`,
+  choices: [
+    { label: 'Stockpile, and let everything else wait', out: { text: 'Fuel is cut, pods are insulated with their own packing foam, the stores are counted twice.', fx: { mat: -10, flags: { climate_known: true, winter_ready: true } } } },
+    { label: 'Note it, and keep to the plan', note: 'The plan was written for a year with no season like that in it.', info: [['later', 'Whoever is coldest when it comes']],
+      out: { text: 'It goes on the board with everything else that is going to be a problem. Nothing is cut and nothing is insulated.', fx: { morale: 1, flags: { climate_known: true } } } },
+  ] });
+add({ id: 'winter.strike', arc: 'winter', tone: 'crisis', title: 'The Dim', repeat: 100, gap: 60, standing: true,
+  when: s => season(s) === 3 && LF.date(s.day).dos <= 14,
+  text: s => `The sun is a coin at arm's length. Forty below at midday. ${LF.date(s.day).year > 1 ? 'Everyone remembers the last one.' : 'Nobody was ready for how quiet it gets.'}\n\n${s.built.shelter ? 'The deep cellars hold at four degrees without a watt of heating.' : `The pods were built for a temperate landing. ${Nwc(s, 'engineer')} says the reactor can heat them, or do everything else, but not both.`}`,
+  choices: [
+    // three at most (2026-11-21): two answers once the cellars are dug (the first and the last), three before; never more on screen
+    { label: 'Winter in the cellars', show: s => !!s.built.shelter, out: { text: 'It is cramped and smells of people, but it is safe. In the long dark someone starts teaching the children to sing.', fx: { morale: 3 } } },
+    { label: 'Run the reactor hot for heat', show: s => !s.built.shelter, req: s => ok(s, 'reactor'), reqText: 'There is no reactor',
+      out: { text: 'The pods are warm. The reactor hall sounds different by the end of it, a note that was not there before.', fx: { machine: { reactor: -14 }, cap: { reactor: -5 } } } },
+    { label: 'Everyone into the reactor hall, shoulder to shoulder', show: s => !s.built.shelter, test: { base: 50, mods: [M('medbay', 10), R('physician', 10), Fl('winter_ready', 15, 'We stockpiled for this')] },
+      ok: { text: 'Thirty days packed together in the hall. Nobody dies, though several people stop speaking to each other.', fx: { morale: -5 } },
+      bad: { text: 'A chest infection goes through the hall and takes the old and the very young.', fx: { pop: -4, morale: -8 } } },
+    { label: 'Heat one pod. The diggers and the children go in it', dark: true, show: s => !s.built.shelter, note: 'One pod can be kept warm on almost nothing, and everyone else gets blankets and each other.', info: [['yield', 'The reactor and the timber spared'], ['danger', 'Everyone not in the pod']],
+      out: { text: s => `${Nwc(s, 'quartermaster')} reads the list at the pod door. The ones on it go in without looking back. The others double up in the cold pods under every blanket there is. Six of them are carried out stiff before the month is over, and the people who carry them are from the warm pod.`,
+        fx: { pop: -6, morale: -5, flags: { ration_by_work: true }, stain: ['cold', 2], chron: 'In the Dim the colony heated one pod, for those it could least spare. Six of the others froze.' } } },
+    // with the cellars dug (2026-11-18): the other answer, so the card asks something
+    { label: 'Keep the yard working up top, in two-hour shifts', show: s => !!s.built.shelter, note: 'The build does not stop for the dark. Forty below takes fingers in two hours.', info: [['yield', 'Materials'], ['danger', 'The shift crews']],
+      out: { text: 'The crews go up in pairs, two hours at a time, and come down grey and shaking to the cellar stoves. The yard keeps moving all through the Dim. Two of them lose fingers. An old man who went up for a third shift nobody asked of him does not come down.', fx: { mat: 30, pop: -1, morale: -2 } } },
+  ] });
+add({ id: 'winter.long', arc: 'winter', tone: 'crisis', title: 'The Thaw That Did Not Come',
+  when: s => LF.date(s.day).year >= 3 && season(s) === 0 && LF.date(s.day).dos <= 12,
+  text: s => `By the sediment calendar the Thaw began nine days ago. The ice on the river is getting thicker.\n\n${Nwc(s, 'geologist')} dated the Thaw from the lake mud, and the mud was wrong.\n\n[[geologist]] "Once or twice a century you get a double dark layer, and I took it for a bad core, I was so pleased with myself for catching the error, and it wasn't an error, was it?"\n\nStores stand at ${Math.round(foodDays(s))} days. Nothing has been planted.`,
+  choices: [
+    { label: 'Eat the seed grain', note: 'Nobody dies this month. Next year\'s harvest is what gets eaten.', info: [['yield', 'A month'], ['danger', 'Next year']],
+      out: { text: 'It buys a month. When the thaw does come, there is very little to put in the ground.', fx: { food: 600, yield: -0.15 } } },
+    { label: 'Send a party to find the hot springs the survey mapped', test: { base: 50, mods: [R('geologist', 10), R('pilot', 5), If(s => s.survey > 100, 10, 'Good maps')] },
+      ok: { text: 'Six days over the ice. A valley of steam and black open water and green, actual green. They come back with sledges of weed and a thermal gradient that makes the engineers stare.', fx: { food: 400, morale: 5, flags: { geothermal: true }, chron: 'In the long winter, the colony found the hot springs. They would later power its turbines.' } },
+      bad: { text: 'Two of the party come back, frostbitten, having found nothing but more ice.', fx: { pop: -3, morale: -6, food: -150 } } },
+    { label: 'The stores will not carry everyone to a late thaw. Decide who they carry', dark: true, note: s => `${Nwc(s, 'quartermaster')} can say to the bowl how many the stores will carry to a late thaw, and it is fewer than are alive.`, info: [['yield', 'The rest see the thaw'], ['danger', 'The ones left off the list']],
+      out: { text: 'The list is made by what a person can do when the ground opens. The ones not on it are moved to the end pod and given water. It is quiet in there by the end of the month. When the thaw comes there is seed to sow and people with the strength to sow it, and an end pod nobody will sleep in.',
+        fx: { pop: -7, food: 450, morale: -6, stain: ['cull', 2], chron: 'In the long winter the colony chose who would be fed to the thaw. Seven were not.' } } },
+  ] });
+// Storm world
+add({ id: 'storm.warn', arc: 'storm', tone: 'pressure', title: 'Glass Falling', w: 14,   // 14 (was 6): its window is one season, and it went undealt on 1,200 games once the generation cards joined the deck
+
+  when: s => s.day >= 38 && s.day < 100,   // < 70 until 2026-11-18: those three months are all taken by scheduled cards now, so no weight could deal it
+  text: s => `The barometer has been dropping for two days under a clear sky. ${Nwc(s, 'pilot')} pulls orbital imagery: a spiral the size of a small continent, tracking up the coast.\n\n[[pilot]] "It's on the same track as the last four, at the same time every year, and it's two days out at the most."${s.flags.site_delta ? '\n\nThe delta is three metres above the river.' : ''}`,
+  choices: [
+    { label: 'Tie down and dig in', note: 'There is not cable enough for everything, and what is left loose will go.', info: [['danger', 'The stores']], out: { text: 'Cables over the pods, the lander chained to rock anchors. It hits two days later and takes what was not tied down, which was a stores shed and most of what was in it.', fx: { mat: -15, food: -80, flags: { climate_known: true } } } },
+    { label: 'Stores into the strong pods. The people from those pods ride it out in the sheds', dark: true, note: 'The two pods that are bolted to rock cannot hold the grain and the people both.', info: [['yield', 'Nothing is lost from the stores'], ['danger', 'Twenty people in the sheds']],
+      out: { text: 'The grain and the spares go into the two pods bolted to rock. The twenty people who slept there are moved to the store sheds with rope and tarpaulin. One shed goes in the second night. The stores come through dry to the last sack.', fx: { pop: -3, morale: -3, flags: { climate_known: true }, stain: ['sheds', 2] } } },
+  ] });
+add({ id: 'storm.strike', arc: 'storm', tone: 'crisis', title: 'Storm Season', repeat: 100, gap: 60, standing: true,
+  when: s => season(s) === 2 && s.day >= 100,
+  text: s => `It comes up the coast on schedule: two hundred kilometre winds, rain like thrown gravel. The harvest is ${s.built.fields || s.built.greenhouse ? 'two-thirds' : 'half'} in.\n\n${s.built.shelter ? 'The storm walls were built for exactly this.' : s.flags.site_delta ? 'The river is already rising.' : 'Everything you own is a sail.'}`,
+  choices: [
+    // three at most (2026-11-21): the first two options are one slot, the storm gates once the walls stand, the pods before; never four on screen
+    { label: 'Close the storm gates', show: s => !!s.built.shelter, out: { text: 'The wind screams over the wall for two days. Behind it, people play cards.', fx: { food: -60, morale: 2 } } },
+    { label: 'Everyone under cover. Let the fields go', note: 'Nobody is out in it. A third of the harvest is.', info: [['danger', 'The harvest']], show: s => !s.built.shelter, out: { text: s => `Two days in the pods, listening to things tear loose.${s.flags.site_delta ? ' The river comes through the lower camp a metre deep.' : ''}`, fx: s => ({ food: s.flags.site_delta ? -420 : -280, mat: -20, machine: { reclaimer: s.flags.site_delta ? -10 : -3 } }) } },
+    { label: 'Crews out to save the harvest', test: { base: 40, mods: [R('botanist', 10), If(s => !!s.built.shelter, 15, 'Storm walls'), If(s => !!s.built.greenhouse, -5, 'Domes need bracing too'), Fl('site_highland', 5, 'High ground')] },
+      ok: { text: 'They rope themselves together and bring it in by the armful. Nobody is lost, though everyone is bruised.', fx: { food: 120, morale: 4 } },
+      bad: { text: 'A dome panel comes off its frame and goes through a work crew like a blade.', fx: { pop: -3, food: -200, morale: -6 } } },
+    { label: 'Crews out, roped to the frames. Nobody comes in until it is in', dark: true, note: 'The watch stands at the pod doors, because without the harvest nobody gets through the winter.', info: [['yield', 'The whole harvest'], ['danger', 'The crews']],
+      out: { text: 'The pod doors are shut behind them and the watch stands at each. They bring it in by the armful for eleven hours, roped to the frames. The harvest is whole. Two of the ropes come in with nobody on them, and one crew will not say what a third man shouted at the door before he went back out.',
+        fx: { food: 260, pop: -3, morale: -3, stain: ['roped', 1] } } },
+  ] });
+add({ id: 'storm.surge', arc: 'storm', tone: 'crisis', title: 'The Big One',
+  when: s => LF.date(s.day).year >= 3 && season(s) === 2 && s.used['storm.strike'] !== undefined && s.day - s.used['storm.strike'] > 20,
+  text: s => `The ship has never logged one this size. ${Nwc(s, 'pilot')} measures the eye at ninety kilometres. It will bring a surge, and it will sit over you for four days.\n\nSomething is going to be lost, and you have about six hours to decide what.`,
+  choices: [
+    { label: 'Save the lander: fly it out', fly: 1, req: s => ok(s, 'lander'), reqText: 'No lander',
+      test: { base: 60, mods: [R('pilot', 10)] },
+      ok: { text: 'It claws out through the leading edge and is gone east. The greenhouses, unguarded, are flattened.', fx: { food: -350, mat: -30 } },
+      bad: { text: s => `A crosswind takes it on the climb-out. ${Nc(s, 'pilot')} almost recovers it.`, fx: { kill: { who: 'pilot', cause: 'flying the lander out ahead of the great storm' }, machine: { lander: -999 }, food: -350 } } },
+    { label: 'Save the harvest: every hand to the fields', note: 'The lander is the only way up to the sleepers, and it will be left on its pad.', info: [['danger', 'The Lander, and everyone still in orbit']], out: { text: 'The grain is in the pods when it hits. The lander pad, the masts and half the workshop roof are not there afterward.', fx: { food: 100, mat: -40, machine: { lander: -30, fabricator: -12 } } } },
+    // three at most (2026-11-21): with the storm walls built, "The walls will hold" takes this option's place
+    { label: 'Save the machines: sandbag the halls', show: s => !s.built.shelter, note: 'The fields will be under water, and the winter is fed from those fields.', info: [['danger', 'The harvest']], out: { text: 'The reactor hall and the workshops ride it out dry. The fields are a lake.', fx: { food: -500, yield: -0.05, machine: { lander: -12 } } } },
+    { label: 'The walls will hold', show: s => !!s.built.shelter, test: { base: 70, mods: [R('engineer', 10)] },
+      ok: { text: 'They hold. On the fourth day people climb up onto them to look at what the storm did to everything outside.', fx: { food: -80, morale: 6 } },
+      bad: { text: 'They hold for three days. On the fourth a section goes, and the sea comes in through it.', fx: { pop: -3, food: -400, mat: -30, morale: -5 } } },
+  ] });
+/* Three options at most (2026-11-21): the tags of the cards trimmed here, one entry per option as they now stand.
+   They replace these cards' entries in content-core.js, which go by the old option order. */
+Object.assign(LF.TAGS, {
+  'und.rings': ['closed bold', 'cautious open', 'open'], 'und.blight': ['closed severe', 'open', 'open severe'], 'und.price': ['open free', 'closed order', 'order open'],
+  'bld.find': ['bold open', 'cautious open', 'closed order'], 'bld.wake': ['bold open', 'closed', 'severe bold'], 'bld.offer': ['bold open', 'closed cautious', 'severe bold'],
+  'bld.finish': ['closed bold', 'open bold', 'severe closed'], 'oth.signal': ['open bold', 'cautious'],
+  'hive.tracks': ['closed bold', 'open mercy', 'cautious open'], 'hive.raid': ['severe bold', 'cautious', 'severe closed'], 'hive.sick': ['mercy open', 'open', 'severe closed'],
+});
+})();

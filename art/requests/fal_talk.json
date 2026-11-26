@@ -1,0 +1,12 @@
+{
+  "id": "fal_talk",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A colony clinic bed in lamplight; on the wall beside it a charcoal map drawn by hand: gullies, ridges, a hollow under a third ridge marked over and over.",
+  "card": "fal.talk (js/thread-fallen.js)",
+  "setting": "colony",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "brn_chorus",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "The flight deck console showing a dense sound spectrogram like a field of grass, a tired officer listening with both hands over the earphones.",
+  "card": "brn.chorus (js/barrens-crossing.js)",
+  "setting": "ship",
+  "officers": [],
+  "notes": "Barrens Part 1, the Crossing. Screenprint light. No faces needed: the card names the officers, and whoever holds the seat varies.",
+  "requested": "2026-11-26, barrens branch"
+}

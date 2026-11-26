@@ -1,0 +1,12 @@
+{
+  "id": "brn_years",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "The Barrens colony at dusk, years on: the domes weathered and added to, a radio mast on the rise above them, fields of pale wiregrass going out to the flats, a few lamps shuttered. Long, quiet, the passing of time.",
+  "card": "brn.years (js/barrens-years.js)",
+  "setting": "colony",
+  "officers": [],
+  "notes": "Barrens, the bridge from Part 2 to Part 3. Screenprint light. Barrens' own dun and red ground, not the graveyard world. No faces.",
+  "requested": "2026-11-26, barrens branch"
+}

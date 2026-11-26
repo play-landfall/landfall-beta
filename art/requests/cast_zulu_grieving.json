@@ -1,0 +1,14 @@
+{
+  "id": "cast_zulu_grieving",
+  "kind": "portrait",
+  "size": "square",
+  "subject_in": "this file",
+  "subject": "Toby O'Neal, the same portrait as cast_zulu: same person, same framing, same clothes and light, same screenprint style. Only the expression changes, to grieving: eyes wet and red-rimmed, mouth pulled down at the corners, the face of someone holding it together and failing.",
+  "card": "speech bubbles and story scenes, any line tagged [[<seat or key>|grieving]] (js/speak.js LF.EXPRESSIONS, exprFace in js/ui.js)",
+  "setting": "planet",
+  "officers": [
+    "zulu"
+  ],
+  "notes": "Paint against the approved cast_zulu as the reference, so the face is unmistakably the same person. It is shown small, as a round bubble face (44 to 64 px), so the expression must read at that size. The aged cast_zulu_old_grieving versions come later. No hollow version.",
+  "requested": "2026-11-26, barrens branch"
+}

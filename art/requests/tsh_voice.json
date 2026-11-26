@@ -1,0 +1,12 @@
+{
+  "id": "tsh_voice",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "The colony radio room at night: an old set, a mast cable through the wall, two operators listening hard to a speaker, one with a hand over the mouth.",
+  "card": "tsh.voice (js/thread-newcomers.js)",
+  "setting": "colony",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

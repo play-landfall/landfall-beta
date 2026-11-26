@@ -1,0 +1,12 @@
+{
+  "id": "site_near",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A long-lens satellite photograph from orbit, straight down at dawn, of a small abandoned colony on a low rise above a dry creek bed on a dun and red worn-flat plain: twelve pale domes, a landing pad, a radio mast, long field strips gone pale with wiregrass. Grainy, high contrast, slightly soft, like a spy-satellite frame.",
+  "card": "setup.site, the two sites from orbit (sitesHTML in js/ui.js)",
+  "setting": "planet",
+  "officers": [],
+  "notes": "Barrens, the barren world (never the graveyard world). Drawn small, as a 16:9 frame with a reticle over it, so it must read as a photograph from orbit.",
+  "requested": "2026-11-26, barrens branch"
+}

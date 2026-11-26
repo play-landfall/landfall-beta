@@ -1,0 +1,12 @@
+{
+  "id": "brn_order",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "The Ariadne's flight deck at night, years out: three people just woken from cryo, blankets round their shoulders, at a console showing an incoming order from Earth and a long archive list. Cold blue console light.",
+  "card": "brn.order (js/barrens-crossing.js)",
+  "setting": "ship",
+  "officers": [],
+  "notes": "Barrens Part 1, the Crossing. Screenprint light. No faces needed: the card names the officers, and whoever holds the seat varies.",
+  "requested": "2026-11-26, barrens branch"
+}

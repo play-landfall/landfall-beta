@@ -1,0 +1,12 @@
+{
+  "id": "brn_earth",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "The ship's long dish on the hull, pointed back the way she came, a faint yellow star in the field behind it.",
+  "card": "brn.earth (js/barrens-crossing.js)",
+  "setting": "ship",
+  "officers": [],
+  "notes": "Barrens Part 1, the Crossing. Screenprint light. No faces needed: the card names the officers, and whoever holds the seat varies.",
+  "requested": "2026-11-26, barrens branch"
+}

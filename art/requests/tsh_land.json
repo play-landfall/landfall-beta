@@ -1,0 +1,12 @@
+{
+  "id": "tsh_land",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "Three clean grey landers on the dun Barrens flats beside the colony pad; a hundred armed people in grey filing down a ramp; a figure at the ramp foot reading from a paper; the weathered colonists watching.",
+  "card": "tsh.land (js/thread-newcomers.js)",
+  "setting": "colony",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

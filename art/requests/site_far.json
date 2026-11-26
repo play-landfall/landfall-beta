@@ -1,0 +1,12 @@
+{
+  "id": "site_far",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A long-lens satellite photograph from orbit, straight down, of a wide empty plain between two worn-down ranges on a dun and red world: red ground over pale sand, a dry creek line marked by lone dark trees, low outcrops of pale rock. Nothing made by people. Grainy, high contrast, like a spy-satellite frame.",
+  "card": "setup.site, the two sites from orbit (sitesHTML in js/ui.js)",
+  "setting": "planet",
+  "officers": [],
+  "notes": "Barrens, the barren world (never the graveyard world). Drawn small, as a 16:9 frame with a reticle over it, so it must read as a photograph from orbit.",
+  "requested": "2026-11-26, barrens branch"
+}

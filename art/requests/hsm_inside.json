@@ -1,0 +1,12 @@
+{
+  "id": "hsm_inside",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A dark colony bedroom from the doorway: a bed with a shape under the blanket, perfectly still, a lamp held at the door throwing a long shadow. No face shown.",
+  "card": "hsm.inside (js/thread-mimics.js)",
+  "setting": "colony",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

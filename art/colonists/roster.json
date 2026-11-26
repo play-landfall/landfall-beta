@@ -1,0 +1,550 @@
+{
+ "_note": "Colonist roster (Lachlan, 2026-11-19): sixty named people (forty until 2026-11-20), the only named colonists and outsiders a game has. x01-x18 painted; x19-x40 are placeholders (pending: true) drawn as a white blank until the local art session paints them: a file landing at art/colonists/xNN.webp is shown as it is, with no step after (take pending off when it lands). kind: colonist (drawn into a game by LF.makePerson) or outsider (never a colonist: speakers for others). stands: the department this person speaks for when its officer's seat is empty (never drawn for anything else). band: prime 30-40, young, older-prime, older, child, born (born in the colony, only for the born-here cards), outsider. Run node tools/roster.js after any change: it writes js/roster.js.",
+ "x01": {
+  "name": "Adaeze Okafor",
+  "sex": "f",
+  "age": 45,
+  "band": "older-prime",
+  "role": "Farm labour lead",
+  "look": "broad-shouldered West African woman, close-cropped hair, rust-orange work shirt",
+  "kind": "colonist",
+  "stands": "crew"
+ },
+ "x02": {
+  "name": "Lars Eriksen",
+  "sex": "m",
+  "age": 65,
+  "band": "older",
+  "role": "Retired fisherman, net-mender",
+  "look": "wiry pale Scandinavian man, white beard, weathered red cheeks, navy knitted jumper",
+  "kind": "colonist"
+ },
+ "x03": {
+  "name": "Rohan Mehta",
+  "sex": "m",
+  "age": 22,
+  "band": "young",
+  "role": "Apprentice technician",
+  "look": "young South Asian man, thick black hair, thin moustache, teal overall jacket",
+  "kind": "colonist"
+ },
+ "x04": {
+  "name": "Niamh Byrne",
+  "sex": "f",
+  "age": 10,
+  "band": "child",
+  "role": "Child",
+  "look": "freckled Irish girl, ginger plait, ochre smock",
+  "kind": "colonist"
+ },
+ "x05": {
+  "name": "Tevita Lolohea",
+  "sex": "m",
+  "age": 35,
+  "band": "prime",
+  "role": "Construction labourer",
+  "look": "stocky Pacific Islander man, curly black hair, broad open face, cream work shirt with braces",
+  "kind": "colonist"
+ },
+ "x06": {
+  "name": "Mei Lin Tan",
+  "sex": "f",
+  "age": 55,
+  "band": "older",
+  "role": "Teacher",
+  "look": "East Asian woman, grey bob, wire glasses, navy work coat",
+  "kind": "colonist"
+ },
+ "x07": {
+  "name": "Kofi Mensah",
+  "sex": "m",
+  "age": 12,
+  "band": "child",
+  "role": "Child",
+  "look": "Black boy, short hair, rust jumper",
+  "kind": "colonist"
+ },
+ "x08": {
+  "name": "Leila Haddad",
+  "sex": "f",
+  "age": 33,
+  "band": "prime",
+  "role": "Nurse",
+  "look": "Middle Eastern woman, dark hair under a teal headscarf, strong brows, brown work vest",
+  "kind": "colonist",
+  "stands": "doctor"
+ },
+ "x09": {
+  "name": "Pavel Novak",
+  "sex": "m",
+  "age": 55,
+  "band": "older",
+  "role": "Smelter foreman",
+  "look": "heavy-set balding Eastern European man, drooping grey moustache, ochre canvas jacket",
+  "kind": "colonist"
+ },
+ "x10": {
+  "name": "Valeria Ruiz",
+  "sex": "f",
+  "age": 25,
+  "band": "young",
+  "role": "Radio and comms operator",
+  "look": "slight Latin American woman, short dark curly hair, blue overalls",
+  "kind": "colonist",
+  "stands": "command"
+ },
+ "x11": {
+  "name": "Daniel Walker",
+  "sex": "m",
+  "age": 45,
+  "band": "older-prime",
+  "role": "Surveyor and tracker",
+  "look": "tall Aboriginal Australian man, short greying beard, navy work shirt",
+  "kind": "colonist",
+  "stands": "scientist"
+ },
+ "x12": {
+  "name": "Lan Nguyen",
+  "sex": "f",
+  "age": 72,
+  "band": "older",
+  "role": "Cook, seed-keeper",
+  "look": "round-faced Southeast Asian grandmother, white hair in a bun, teal cardigan",
+  "kind": "colonist"
+ },
+ "x13": {
+  "name": "Hannah Clarke",
+  "sex": "f",
+  "age": 32,
+  "band": "prime",
+  "role": "Greenhouse grower",
+  "look": "fair-haired English woman, short ponytail, a few freckles, teal work shirt",
+  "kind": "colonist"
+ },
+ "x14": {
+  "name": "Marco Bellini",
+  "sex": "m",
+  "age": 38,
+  "band": "prime",
+  "role": "Machinist",
+  "look": "dark-haired Italian man, short neat beard, strong jaw, rust canvas work jacket",
+  "kind": "colonist",
+  "stands": "engineer"
+ },
+ "x15": {
+  "name": "Kenji Sato",
+  "sex": "m",
+  "age": 35,
+  "band": "prime",
+  "role": "Power and turbine technician",
+  "look": "Japanese man, short black hair, clean-shaven, calm steady look, cream shirt under navy bib overalls",
+  "kind": "colonist"
+ },
+ "x16": {
+  "name": "Camila Souza",
+  "sex": "f",
+  "age": 35,
+  "band": "prime",
+  "role": "Soil scientist",
+  "look": "Brazilian woman, long dark wavy hair tied back, warm brown skin, ochre work shirt",
+  "kind": "colonist"
+ },
+ "x17": {
+  "name": "Jack Doyle",
+  "sex": "m",
+  "age": 32,
+  "band": "prime",
+  "role": "Farm labourer",
+  "look": "sandy-haired Australian man, cropped hair, stubble, sun-browned, cream shirt with rolled sleeves. Looks a lot like Toby O'Neal: never in a scene with Toby",
+  "kind": "colonist"
+ },
+ "x18": {
+  "name": "Wanjiru Kamau",
+  "sex": "f",
+  "age": 38,
+  "band": "prime",
+  "role": "Well and water engineer",
+  "look": "Kenyan woman, short natural hair, high cheekbones, navy jacket over rust shirt",
+  "kind": "colonist"
+ },
+ "x19": {
+  "name": "Grace Mutasa",
+  "sex": "f",
+  "age": 41,
+  "band": "older-prime",
+  "role": "Watch sergeant",
+  "kind": "colonist",
+  "stands": "security",
+  "look": "tall Zimbabwean woman, close-shaved head, steady hard stare, navy watch jacket over a rust shirt"
+ },
+ "x20": {
+  "name": "Ivo Petrovic",
+  "sex": "m",
+  "age": 52,
+  "band": "older",
+  "role": "Stores clerk",
+  "kind": "colonist",
+  "stands": "quartermaster",
+  "look": "thin Croatian man, receding grey hair, reading glasses pushed up, cream shirt with a pencil behind one ear"
+ },
+ "x21": {
+  "name": "Siobhan Kearney",
+  "sex": "f",
+  "age": 58,
+  "band": "older",
+  "role": "Midwife",
+  "kind": "colonist",
+  "look": "sturdy Irish woman, short grey-red hair, lined kind face, teal clinic smock"
+ },
+ "x22": {
+  "name": "Thomas Adeyemi",
+  "sex": "m",
+  "age": 61,
+  "band": "older",
+  "role": "Lay preacher",
+  "kind": "colonist",
+  "look": "Nigerian man, white close-cropped hair and beard, deep-set eyes, ochre collarless shirt"
+ },
+ "x23": {
+  "name": "Ana Lucia Vargas",
+  "sex": "f",
+  "age": 47,
+  "band": "older-prime",
+  "role": "Counsellor",
+  "kind": "colonist",
+  "look": "Colombian woman, dark hair with a white streak tied back, warm tired eyes, rust cardigan"
+ },
+ "x24": {
+  "name": "Bogdan Lazarev",
+  "sex": "m",
+  "age": 40,
+  "band": "prime",
+  "role": "Pit digger, ore crew",
+  "kind": "colonist",
+  "look": "broad Bulgarian man, shaved head, heavy black beard, dust-grey canvas jacket"
+ },
+ "x25": {
+  "name": "Finn Gallagher",
+  "sex": "m",
+  "age": 19,
+  "band": "young",
+  "role": "Rigger",
+  "kind": "colonist",
+  "look": "lanky young Irish man, untidy brown hair, freckles, rust work shirt with a rope coil over one shoulder"
+ },
+ "x26": {
+  "name": "Nomvula Dube",
+  "sex": "f",
+  "age": 29,
+  "band": "prime",
+  "role": "Hauler",
+  "kind": "colonist",
+  "look": "strong South African woman, hair in short twists, sweat-sheened, cream vest under navy overalls"
+ },
+ "x27": {
+  "name": "Yusra Farah",
+  "sex": "f",
+  "age": 34,
+  "band": "prime",
+  "role": "Fitter, speaks for the shifts",
+  "kind": "colonist",
+  "look": "Somali woman, ochre headscarf, sharp direct gaze, teal fitter's jacket"
+ },
+ "x28": {
+  "name": "Tama Ngata",
+  "sex": "m",
+  "age": 8,
+  "band": "child",
+  "role": "Child",
+  "kind": "colonist",
+  "look": "small Maori boy, black curly hair, gap-toothed, oversized navy jumper"
+ },
+ "x29": {
+  "name": "Ines Duarte",
+  "sex": "f",
+  "age": 13,
+  "band": "child",
+  "role": "Child",
+  "kind": "colonist",
+  "look": "Portuguese girl, long dark hair in a low ponytail, serious face, teal smock"
+ },
+ "x30": {
+  "name": "Kiri Tane",
+  "sex": "f",
+  "age": null,
+  "band": "born",
+  "role": "Born in the colony",
+  "kind": "colonist",
+  "look": "young woman of mixed heritage, around eighteen, cropped dark hair, sun-browned, rust work shirt made from ship cloth"
+ },
+ "x31": {
+  "name": "Joss Halvorsen",
+  "sex": "m",
+  "age": null,
+  "band": "born",
+  "role": "Born in the colony",
+  "kind": "colonist",
+  "look": "young man of mixed heritage, around twenty, fair hair, broad shoulders, cream shirt patched with navy"
+ },
+ "x32": {
+  "name": "Abebe Tadesse",
+  "sex": "m",
+  "age": 70,
+  "band": "older",
+  "role": "Retired machinist",
+  "kind": "colonist",
+  "look": "slight Ethiopian elder, white beard, thin face, navy coat buttoned to the neck"
+ },
+ "x33": {
+  "name": "Dmitri Volkov",
+  "sex": "m",
+  "age": 36,
+  "band": "prime",
+  "role": "Butcher and tanner",
+  "kind": "colonist",
+  "look": "Russian man, cropped fair hair, pale blue eyes, heavy forearms, rust leather apron over cream shirt"
+ },
+ "x34": {
+  "name": "Priya Raman",
+  "sex": "f",
+  "age": 31,
+  "band": "prime",
+  "role": "Fabricator operator",
+  "kind": "colonist",
+  "look": "Tamil woman, black hair in a long plait, small nose stud, navy overalls with ochre patches"
+ },
+ "x35": {
+  "name": "Mara Quell",
+  "sex": "f",
+  "age": 50,
+  "band": "outsider",
+  "role": "Speaker for the Neighbours",
+  "kind": "outsider",
+  "look": "lean weathered woman, hair cut ragged and grey, home-woven ochre wrap, a bone toggle at the throat"
+ },
+ "x36": {
+  "name": "Ilse Varnholt",
+  "sex": "f",
+  "age": 52,
+  "band": "outsider",
+  "role": "Captain of the other ship",
+  "kind": "outsider",
+  "look": "severe northern European woman, iron-grey hair scraped back, a faded navy flight jacket with someone else's insignia"
+ },
+ "x37": {
+  "name": "Cassius Dorn",
+  "sex": "m",
+  "age": 68,
+  "band": "outsider",
+  "role": "Old speaker of the Reach",
+  "kind": "outsider",
+  "look": "old pale man, long white hair, pinched hungry face, patched rust coat of salvaged ship cloth"
+ },
+ "x38": {
+  "name": "Lena Harrow",
+  "sex": "f",
+  "age": 45,
+  "band": "outsider",
+  "role": "Envoy of the other settlement",
+  "kind": "outsider",
+  "look": "composed woman, dark hair in a tight knot, clean cream tunic, a teal sash of office"
+ },
+ "x39": {
+  "name": "Wick",
+  "sex": "m",
+  "age": 35,
+  "band": "outsider",
+  "role": "Envoy of the Warrens",
+  "kind": "outsider",
+  "look": "gaunt man, matted dark hair, filthy face, eyes too bright, hide wrap over a rotten ship jumpsuit"
+ },
+ "x40": {
+  "name": "Abel Strand",
+  "sex": "m",
+  "age": 72,
+  "band": "outsider",
+  "role": "Hermit, last of an earlier landing",
+  "kind": "outsider",
+  "look": "wiry old man, long white beard, deep tan, faded navy jumpsuit worn to threads"
+ },
+ "x41": {
+  "name": "Marisol Ochoa",
+  "sex": "f",
+  "age": 44,
+  "band": "older-prime",
+  "role": "Build foreman, runs the construction crews",
+  "kind": "colonist",
+  "look": "solid Mexican woman, light olive-brown skin, black hair pulled back hard, lined squinting face, rust work shirt with rolled sleeves"
+ },
+ "x42": {
+  "name": "Oleg Marchenko",
+  "sex": "m",
+  "age": 39,
+  "band": "prime",
+  "role": "Night-shift lead",
+  "kind": "colonist",
+  "look": "tall gaunt Ukrainian man, pale skin, close-cropped grey-blond hair, heavy-lidded tired eyes, navy work jacket"
+ },
+ "x43": {
+  "name": "Fatima Benali",
+  "sex": "f",
+  "age": 41,
+  "band": "older-prime",
+  "role": "Cook, runs the mess kitchen",
+  "kind": "colonist",
+  "look": "round-faced Moroccan woman, warm olive-brown skin, dark curly hair under a cream kerchief, flour on one cheek, ochre apron over a teal shirt"
+ },
+ "x44": {
+  "name": "Henrik Lund",
+  "sex": "m",
+  "age": 48,
+  "band": "older-prime",
+  "role": "Stores clerk",
+  "kind": "colonist",
+  "look": "thin Danish man, pale skin, neat sandy hair going thin, wire-rimmed glasses, buttoned cream shirt"
+ },
+ "x45": {
+  "name": "Amara Nwosu",
+  "sex": "f",
+  "age": 27,
+  "band": "young",
+  "role": "Pump hand",
+  "kind": "colonist",
+  "look": "young Nigerian woman, deep dark brown skin, short natural hair, strong shoulders, teal coveralls with the top tied at the waist over a cream vest"
+ },
+ "x46": {
+  "name": "Walter Higgs",
+  "sex": "m",
+  "age": 63,
+  "band": "older",
+  "role": "Lamp trimmer and wash-house hand",
+  "kind": "colonist",
+  "look": "stooped English man, pale ruddy skin, white stubble, bald on top with grey at the sides, soot on his fingers, faded navy cardigan"
+ },
+ "x47": {
+  "name": "Jorge Medina",
+  "sex": "m",
+  "age": 37,
+  "band": "prime",
+  "role": "Stoker at the smelter and boilers",
+  "kind": "colonist",
+  "look": "broad Chilean man, light olive-brown skin, black hair slick with sweat, thick forearms, scorched rust singlet"
+ },
+ "x48": {
+  "name": "Bridget Kowalczyk",
+  "sex": "f",
+  "age": 33,
+  "band": "prime",
+  "role": "Carter and boot mender",
+  "kind": "colonist",
+  "look": "freckled Polish woman, pale skin, long straw-blonde braid, wind-burnt cheeks, ochre canvas jacket"
+ },
+ "x49": {
+  "name": "Samuel Osei",
+  "sex": "m",
+  "age": 26,
+  "band": "young",
+  "role": "Clinic orderly",
+  "kind": "colonist",
+  "look": "slim Ghanaian man, deep dark brown skin, short hair, gentle careful face, cream clinic smock"
+ },
+ "x50": {
+  "name": "Aiko Mori",
+  "sex": "f",
+  "age": 30,
+  "band": "prime",
+  "role": "Bread hand at the ovens",
+  "kind": "colonist",
+  "look": "small Japanese woman, light skin, black bob cut, flour-dusted forearms, navy apron over a cream shirt"
+ },
+ "x51": {
+  "name": "Lucia Romero",
+  "sex": "f",
+  "age": 6,
+  "band": "child",
+  "role": "Child",
+  "kind": "colonist",
+  "look": "little Colombian girl, light olive-brown skin, two dark pigtails, missing front tooth, oversized rust jumper"
+ },
+ "x52": {
+  "name": "Arjun Pillai",
+  "sex": "m",
+  "age": 9,
+  "band": "child",
+  "role": "Child",
+  "kind": "colonist",
+  "look": "thin Tamil boy, warm brown skin, untidy black hair, serious dark eyes, teal shirt too big for him"
+ },
+ "x53": {
+  "name": "Freya Olsen",
+  "sex": "f",
+  "age": 11,
+  "band": "child",
+  "role": "Child",
+  "kind": "colonist",
+  "look": "Norwegian girl, pale freckled skin, white-blonde hair in a messy ponytail, scab on her chin, navy knitted jumper"
+ },
+ "x54": {
+  "name": "Moses Banda",
+  "sex": "m",
+  "age": 7,
+  "band": "child",
+  "role": "Child",
+  "kind": "colonist",
+  "look": "small Zambian boy, deep dark brown skin, close-cropped hair, wide grin with the mouth closed, ochre shirt"
+ },
+ "x55": {
+  "name": "Hana Kovac",
+  "sex": "f",
+  "age": 14,
+  "band": "child",
+  "role": "Child",
+  "kind": "colonist",
+  "look": "Croatian girl of fourteen, pale skin, long dark brown hair, wary watchful eyes, cream shirt and a rust scarf"
+ },
+ "x56": {
+  "name": "Sela Lolohea",
+  "sex": "f",
+  "age": 9,
+  "band": "born",
+  "role": "Born in the colony",
+  "kind": "colonist",
+  "look": "Pacific Islander girl of about nine, warm brown skin, thick black curls, bare feet, a dress sewn from ship cloth in teal"
+ },
+ "x57": {
+  "name": "Ewan Mensah-Byrne",
+  "sex": "m",
+  "age": 16,
+  "band": "born",
+  "role": "Born in the colony",
+  "kind": "colonist",
+  "look": "lanky boy of sixteen of mixed heritage, light brown skin, short tight curls, sun-browned, rust shirt made from ship cloth"
+ },
+ "x58": {
+  "name": "Noor Haddad",
+  "sex": "f",
+  "age": 24,
+  "band": "born",
+  "role": "Born in the colony",
+  "kind": "colonist",
+  "look": "young woman in her twenties of Lebanese heritage, olive skin, long black hair tied back, steady dark eyes, a coat stitched from ship cloth and native hide"
+ },
+ "x59": {
+  "name": "Spindle",
+  "sex": "m",
+  "age": 19,
+  "band": "outsider",
+  "role": "Speaker for the machine-raised",
+  "kind": "outsider",
+  "look": "feral young man of nineteen, pale skin, shaved scarred scalp, too-large staring eyes, clothes patched from machine insulation and wire"
+ },
+ "x60": {
+  "name": "Tomas Reyes",
+  "sex": "m",
+  "age": 47,
+  "band": "outsider",
+  "role": "Speaker of the upriver settlement",
+  "kind": "outsider",
+  "look": "weathered Filipino man in his forties, warm brown skin, greying black hair, broad calm face, a colony work shirt mended many times and a river-reed hat in his hand"
+ }
+}

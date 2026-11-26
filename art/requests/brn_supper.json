@@ -1,0 +1,12 @@
+{
+  "id": "brn_supper",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "An empty wardroom table set for supper, a pot and bowls, a speaker grille on the wall, the light warm and the room very quiet.",
+  "card": "brn.supper (js/barrens-crossing.js)",
+  "setting": "ship",
+  "officers": [],
+  "notes": "Barrens Part 1, the Crossing. Screenprint light. No faces needed: the card names the officers, and whoever holds the seat varies.",
+  "requested": "2026-11-26, barrens branch"
+}

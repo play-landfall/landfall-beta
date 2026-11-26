@@ -1,0 +1,12 @@
+{
+  "id": "tsh_flare",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A new star low in the west at dusk over the Barrens flats, brighter than the rest, a faint plume: a drive braking. The colony domes in silhouette, one figure at a long lens on a tripod.",
+  "card": "tsh.flare (js/thread-newcomers.js)",
+  "setting": "world",
+  "officers": [],
+  "notes": "Barrens Part 3. Screenprint light. Barrens' own dun and red ground. Never show the Mocker itself: only what it leaves and who sees it.",
+  "requested": "2026-11-26, barrens branch"
+}

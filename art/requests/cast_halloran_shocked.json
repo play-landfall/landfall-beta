@@ -1,0 +1,14 @@
+{
+  "id": "cast_halloran_shocked",
+  "kind": "portrait",
+  "size": "square",
+  "subject_in": "this file",
+  "subject": "Roberta Craigie, the same portrait as cast_halloran: same person, same framing, same clothes and light, same screenprint style. Only the expression changes, to shocked: mouth open, eyes wide, the colour gone out of the face, the instant after hearing something impossible.",
+  "card": "speech bubbles and story scenes, any line tagged [[<seat or key>|shocked]] (js/speak.js LF.EXPRESSIONS, exprFace in js/ui.js)",
+  "setting": "planet",
+  "officers": [
+    "halloran"
+  ],
+  "notes": "Paint against the approved cast_halloran as the reference, so the face is unmistakably the same person. It is shown small, as a round bubble face (44 to 64 px), so the expression must read at that size. The aged cast_halloran_old_shocked versions come later. No hollow version.",
+  "requested": "2026-11-26, barrens branch"
+}

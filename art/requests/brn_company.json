@@ -1,0 +1,12 @@
+{
+  "id": "brn_company",
+  "kind": "scene",
+  "size": "wide",
+  "subject_in": "this file",
+  "subject": "A third person, newly woken and wrapped in a foil blanket, sitting up on a cryo pod lid while an officer checks her pulse.",
+  "card": "brn.company (js/barrens-crossing.js)",
+  "setting": "ship",
+  "officers": [],
+  "notes": "Barrens Part 1, the Crossing. Screenprint light. No faces needed: the card names the officers, and whoever holds the seat varies.",
+  "requested": "2026-11-26, barrens branch"
+}
