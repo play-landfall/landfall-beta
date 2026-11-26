@@ -682,6 +682,14 @@ html.grim2 h2 { letter-spacing:.01em; }
 .pz.walk svg .go circle.ring { fill:none; stroke:var(--rust); stroke-width:1.5; opacity:.55; transform-box:fill-box; transform-origin:center; animation:pzring 1.6s ease-in-out infinite; }
 .pz.walk svg .go:hover circle:not(.hit):not(.ring), .pz.walk svg .go.dest circle:not(.hit):not(.ring) { stroke:var(--rust); } .pz.walk svg .go text { fill:var(--ink); }
 .pz.walk svg text.cost { font-size:8px; fill:var(--rust); font-weight:800; }
+/* the walk on the Ariadne's own plan (2026-11-27): the pixel plan under the nodes, the room they are in above it */
+.pz .pzpic { display:block; width:100%; aspect-ratio:3/2; object-fit:cover; border-radius:12px; margin-bottom:8px; image-rendering:pixelated; background:var(--card); }
+.pz.walk svg image.plan { opacity:.45; image-rendering:pixelated; }
+.pz.walk:has(image.plan) svg line { stroke:var(--ink); stroke-width:1.5; opacity:.35; } .pz.walk:has(image.plan) svg line.on { opacity:.75; }
+.pz.walk:has(image.plan) svg g circle:not(.hit):not(.ring) { stroke:var(--ink); stroke-width:1.5; }
+.pz.walk:has(image.plan) svg text { font-size:10px; }
+.pz.walk svg text { paint-order:stroke; stroke:var(--raise); stroke-width:3px; stroke-linejoin:round; }
+.pz.walk svg text.cost { paint-order:stroke; stroke:var(--raise); stroke-width:3px; }
 .pz.walk svg circle.party { fill:var(--rust); stroke:var(--ink); stroke-width:1.5; }
 .pz.walk.moving svg .at circle { fill:var(--card); stroke:var(--rust); } .pz.walk.moving svg .go circle.ring, .pz.walk.moving svg text.cost { opacity:0; transition:opacity .15s; }
 .pz.walk.moving .pzmoves, .pz.walk.moving .pbtn.arm { background:var(--rust); color:var(--paper); }

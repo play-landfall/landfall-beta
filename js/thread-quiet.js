@@ -246,31 +246,44 @@ B('boarding', { id: 'qs.deep', tone: 'crisis', title: 'Forty Minutes', urgent: t
    the walk where it was; moves go through LF.pzMove (UI and sim), dice from an LCG kept in pz.r, never s.rng.
    The card's one ordinary option leaves it to the party lead, which deals qs.deep as before. */
 LF.PUZZLES = LF.PUZZLES || {};
+/* The Ariadne as she is built (docs/ariadne-plan.md, 2026-11-27), drawn over the pixel plan of her (art/walk/plan.webp, the
+   board's background): aft on the left, the bow on the right. The spine runs from the aft hub (the hold, the aft ring's spoke,
+   banks B and C) to the fore hub (bank D, the fore ring's spoke, the collar); the drum holds the collar and, past it, the
+   bridge in the nose; the fore ring holds the crew deck, the galley and the infirmary round its rim. x and y are in the
+   board's units: the pixel plan's own 810 by 540, times 0.395, so each sits on its room in the picture. */
 const ROOMS = {
-  collar: { name: 'the docking collar', adj: ['spine'], x: 150, y: 140, ly: 18 },
-  spine: { name: 'the spine', adj: ['collar', 'crew', 'bridge', 'bankB', 'hold'], x: 150, y: 84, lx: -24, ly: 18 },
-  bridge: { name: 'the bridge', adj: ['spine', 'infirm'], x: 34, y: 84, ly: 20 },
-  infirm: { name: 'the infirmary', adj: ['bridge', 'crew'], x: 78, y: 30, ly: -14 },
-  crew: { name: 'the crew deck', adj: ['spine', 'galley', 'infirm'], x: 150, y: 30, ly: -14 },
-  galley: { name: 'the galley', adj: ['crew'], x: 222, y: 30, ly: -14 },
-  bankB: { name: 'bank B', adj: ['spine', 'bankC'], x: 212, y: 84, ly: -14 },
-  bankC: { name: 'bank C', adj: ['bankB', 'hold'], x: 270, y: 84, ly: -14 },
-  hold: { name: 'the hold', adj: ['bankC', 'spine'], x: 240, y: 140, ly: 18 },
+  collar: { name: 'the docking collar', adj: ['spine', 'bridge'], x: 261, y: 92, ly: -10 },
+  bridge: { name: 'the bridge', adj: ['collar'], x: 295, y: 101, ly: 16 },
+  spine: { name: 'the spine', adj: ['collar', 'crew', 'bankD', 'spineAft'], x: 229, y: 101, ly: 16 },
+  crew: { name: 'the crew deck', adj: ['spine', 'galley', 'infirm'], x: 238, y: 50, ly: -9 },
+  galley: { name: 'the galley', adj: ['crew', 'infirm'], x: 239, y: 71, lx: 18, ly: 3 },
+  infirm: { name: 'the infirmary', adj: ['crew', 'galley'], x: 238, y: 150, ly: 14 },
+  bankD: { name: 'bank D', adj: ['spine'], x: 203, y: 89, ly: -9 },
+  spineAft: { name: 'the aft spine', adj: ['spine', 'bankB', 'bankC', 'hydro', 'hold'], x: 162, y: 101, ly: 16 },
+  bankB: { name: 'bank B', adj: ['spineAft'], x: 176, y: 89, ly: -9 },
+  bankC: { name: 'bank C', adj: ['spineAft'], x: 189, y: 113, ly: 15 },
+  hydro: { name: 'the hydroponics ring', adj: ['spineAft'], x: 152, y: 51, ly: -9 },
+  hold: { name: 'the hold', adj: ['spineAft', 'drive'], x: 127, y: 101, ly: 16 },
+  drive: { name: 'the drive', adj: ['hold'], x: 17, y: 101, ly: 16 },
 };
+/* what some ways through cost on top of the five minutes a move: the spoke ladders up into a ring's weight, the long way
+   round the fore ring's rim, and the crawlway down the boom to the drive */
+const LONG = { 'crew|spine': 2, 'hydro|spineAft': 2, 'crew|infirm': 4, 'drive|hold': 10 };
+const LONG_WHY = { 'crew|spine': 'up the spoke ladder', 'hydro|spineAft': 'up the spoke ladder', 'crew|infirm': 'the long way round the rim', 'drive|hold': 'the boom crawlway' };
 LF.WALK_ROOMS = ROOMS;
-const SUIT = 60, STEP = 5, CUT = 10, THIN = 5, SKIN = 10, TURN = 10;   // minutes: the suits, a move, a sealed door, an airless deck, a grown wall, the moment it gets to one
+const SUIT = 60, STEP = 4, CUT = 10, THIN = 5, SKIN = 10, TURN = 10;   // minutes (STEP was 5 on the nine-compartment ship; 4 since she has thirteen, 2026-11-27): the suits, a move, a sealed door, an airless deck, a grown wall, the moment it gets to one
 const edge = (a, b) => [a, b].sort().join('|');
 const roomName = id => ROOMS[id].name, RoomName = id => cap1(ROOMS[id].name);
 /* where each truth is aboard, what moves (hunt: comes for the party; none), what is sealed, airless or grown over */
 const WALK = {
-  gone:    { target: 'bankC', mode: 'none', seal: ['hold|spine'], thin: [], grown: [] },
-  changed: { target: 'galley', mode: 'hunt', thing: 'infirm', seal: ['hold|spine'], thin: [], grown: [] },
-  grown:   { target: 'hold', mode: 'spread', seal: [], thin: [], grown: ['hold', 'bankC'] },
-  double:  { target: 'infirm', mode: 'none', seal: ['hold|spine'], thin: [], grown: [] },
-  help:    { target: 'bankC', mode: 'none', seal: ['hold|spine'], thin: ['crew', 'galley', 'infirm', 'bridge'], grown: [] },
-  away:    { target: 'crew', mode: 'none', seal: ['crew|spine', 'hold|spine'], thin: [], grown: [] },
+  gone:    { target: 'bankC', mode: 'none', seal: ['hold|spineAft'], thin: [], grown: [] },
+  changed: { target: 'galley', mode: 'hunt', thing: 'infirm', seal: ['hold|spineAft'], thin: [], grown: [] },
+  grown:   { target: 'hold', mode: 'spread', seal: [], thin: [], grown: ['hold', 'drive'] },   // out of the hold and the warm reactor bay (bank C, on the old plan, sat beside the hold)
+  double:  { target: 'infirm', mode: 'none', seal: ['hold|spineAft'], thin: [], grown: [] },
+  help:    { target: 'bankC', mode: 'none', seal: ['hold|spineAft'], thin: ['crew', 'galley', 'infirm', 'bridge'], grown: [] },
+  away:    { target: 'crew', mode: 'none', seal: ['crew|spine', 'hold|spineAft'], thin: [], grown: [] },
   other:   { target: 'hold', mode: 'hunt', thing: 'bankC', seal: [], thin: [], grown: [] },
-  waker:   { target: 'hold', mode: 'shy', thing: 'galley', seal: ['hold|spine'], thin: [], grown: [] },
+  waker:   { target: 'hold', mode: 'shy', thing: 'galley', seal: ['hold|spineAft'], thin: [], grown: [] },
 };
 const ROOM_LINE = {
   collar: 'The collar: hard seal, lights on, nobody to meet them.',
@@ -282,24 +295,28 @@ const ROOM_LINE = {
   bankB: 'Bank B, the pods in their rows, every light green.',
   bankC: 'Bank C is colder. Frost on the pod seams.',
   hold: 'The hold. The system cradles in their racks, and the cargo lights down low.',
+  spineAft: 'The aft end of the spine, past the last of the banks: the hub where the aft ring\'s spoke comes in, and the hatch to the hold.',
+  bankD: 'Bank D, the oldest pods aboard, the frost on their seams gone yellow.',
+  hydro: 'Up the spoke ladder into the aft ring\'s weight: the hydroponics racks under their lamps, and the workshop bench at the far end.',
+  drive: 'Down the boom crawlway, past the shield, into the reactor bay: the empty cradle where the reactor rode down, and the cold.',
 };
 /* what each truth leaves in the compartments: evidence, counted as clues */
 const WALK_LINE = {
-  gone: { spine: 'Frost on the spine\'s handrails, thicker toward bank B.', crew: 'Every bunk on the crew deck is made, tight enough to bounce a coin.', galley: 'A cup of tea on the galley counter has dried to a brown ring.',
+  gone: { hydro: 'The hydroponics racks have gone brown on their trays, and the lamps are still burning over them.', drive: 'The crawlway lights are on all the way down the boom, and the reactor bay hatch at the end is standing open.', spine: 'Frost on the spine\'s handrails, thicker toward bank B.', crew: 'Every bunk on the crew deck is made, tight enough to bounce a coin.', galley: 'A cup of tea on the galley counter has dried to a brown ring.',
     bridge: 'The bridge log stops at ten past two on the night she went quiet. The last line is the inner airlock door, cycling.', bankB: 'Bank B is as it should be, every light green, which somehow makes it worse.' },
-  changed: { spine: 'There is humming in the vents along the spine, a few notes over and over, loudest at the crew deck hatch.', crew: 'Every bunk on the crew deck has been dragged round to face the floor, the planet side.',
+  changed: { bankD: 'Every pod lid in bank D has a face drawn on it in grease pencil, smiling, and all the faces are the same.', spine: 'There is humming in the vents along the spine, a few notes over and over, loudest at the crew deck hatch.', crew: 'Every bunk on the crew deck has been dragged round to face the floor, the planet side.',
     infirm: 'Every bed in the infirmary has been slept in. Every chart says the same word, in the same hand: well.', bridge: 'Someone has written a name across the main screen in grease pencil. It is a name for the world, and nobody on the ground gave it.' },
-  grown: { spine: 'The spine is warmer toward the stern, and the air tastes of salt.', galley: 'The galley is cold and clean, and somebody has taken every knife.',
+  grown: { hydro: 'The hydroponics racks have gone over to something that is not lettuce: pale, ribbed, and warm to the glove.', spine: 'The spine is warmer toward the stern, and the air tastes of salt.', galley: 'The galley is cold and clean, and somebody has taken every knife.',
     bankB: 'Bank B is blood warm. The pods are fogged on the inside.', crew: 'The crew deck\'s locker doors are welded shut from outside, all of them, in a hurry.' },
   double: { spine: 'Forward, past the crew deck, one light is on: the infirmary\'s.', bridge: (c) => `The watch log has been written up every day since the flight, in one hand. It is ${c.dblFirst}'s.`, crew: (c) => `One bunk on the crew deck is in use, and the name on its locker is ${c.dblFirst}'s.`,
     galley: 'The galley bin: one ration pack a meal, every meal, for one person, for months.', bankB: (c) => `${cap1(c.dblFirst)}'s own pod in bank B is open, and dry, and logged as opened on the day of the flight.` },
-  help: { spine: 'A cable is taped along the spine\'s ceiling, every metre, running aft toward the banks.', crew: 'There is no air on the crew deck. Frost on every surface, and a door blown off its track.', bridge: 'The flight computer is dark. Somebody has opened its panel and pulled the boards out one by one, looking for the fault.',
-    bankB: 'The cable from the spine runs the length of bank B and through the bulkhead into bank C.', galley: 'The galley has been emptied of food into sacks. The sacks are gone.' },
+  help: { hydro: 'The hydroponics ring still has air. Somebody has been sleeping between the warm racks, and has left in a hurry.', spine: 'A cable is taped along the spine\'s ceiling, every metre, running aft toward the banks.', crew: 'There is no air on the crew deck. Frost on every surface, and a door blown off its track.', bridge: 'The flight computer is dark. Somebody has opened its panel and pulled the boards out one by one, looking for the fault.',
+    bankB: 'The cable from the spine runs into bank B, round the pods and out again, down under the spine toward bank C.', galley: 'The galley has been emptied of food into sacks. The sacks are gone.' },
   away: { spine: 'There is a smell in the spine, coming through the suit filters, which should not be possible.', bankB: 'Six pods in bank B are open and have been wiped clean with disinfectant, lids and all.',
     bridge: 'The bridge has a list taped to the screen: names off the waking roll, each with a time beside it.', infirm: 'The infirmary glass is taped over from the inside, corner to corner.' },
-  waker: { spine: 'There are scuffs along the spine\'s duct covers at hands-and-knees height, worn to bare metal, toward bank C.', galley: 'The galley stores have been emptied a few packs at a time, for years, and the empty wrappers folded flat and kept.',
-    bankC: 'One pod in bank C has a lid that was forced open from inside, long ago: the edges are rusted. Beyond it, the hatch to the hold has been propped with a boot.', crew: 'Somebody has been sleeping under the crew deck table, never in a bunk, on a nest of cargo blankets.' },
-  other: { spine: 'There is a light in the cargo lift shaft where there has never been one.', bankB: 'Pods in bank B have been tagged in a code that is not the ship\'s.',
+  waker: { hydro: 'One tray in the hydroponics ring is still growing, watered by hand for years. The rest are dust.', spine: 'There are scuffs along the spine\'s duct covers at hands-and-knees height, worn to bare metal, toward bank C.', galley: 'The galley stores have been emptied a few packs at a time, for years, and the empty wrappers folded flat and kept.',
+    bankC: 'One pod in bank C has a lid that was forced open from inside, long ago: the edges are rusted. Out on the spine, the hatch aft to the hold has been propped open with a boot.', crew: 'Somebody has been sleeping under the crew deck table, never in a bunk, on a nest of cargo blankets.' },
+  other: { drive: 'Someone has been at the empty reactor cradle: new bolts in it, of a pattern the ship has never carried.', spine: 'There is a light in the cargo lift shaft where there has never been one.', bankB: 'Pods in bank B have been tagged in a code that is not the ship\'s.',
     bankC: 'Eight cradles in bank C are empty, the couplings cut clean.', bridge: 'The docking log shows a second collar in use, on the far side of the hull, that she was never built with.' },
 };
 /* what is heard from the next compartment over: the thing, never seen */
@@ -342,7 +359,7 @@ const ARRIVE = {
 const rnd = pz => { pz.r = (pz.r * 1103515245 + 12345) % 2147483648; return pz.r / 2147483648; };
 const near = r => ROOMS[r].adj;
 /* the shortest way through, in minutes as things stand: what the sim's walker and the "way back" figure read */
-const cost = (pz, a, b) => STEP + (pz.seal.includes(edge(a, b)) && !pz.cut.includes(edge(a, b)) ? CUT : 0) + (pz.thin.includes(b) ? THIN : 0) + (pz.grown.includes(b) ? SKIN : 0);
+const cost = (pz, a, b) => STEP + (LONG[edge(a, b)] || 0) + (pz.seal.includes(edge(a, b)) && !pz.cut.includes(edge(a, b)) ? CUT : 0) + (pz.thin.includes(b) ? THIN : 0) + (pz.grown.includes(b) ? SKIN : 0);
 LF.walkPath = function (pz, from, to) {
   const d = { [from]: 0 }, prev = {}, q = [from];
   while (q.length) { q.sort((a, b) => d[a] - d[b]); const u = q.shift(); if (u === to) break;
@@ -363,7 +380,7 @@ LF.PUZZLES.walk = {
   moves(s, pz) {
     if (pz.done) return [];
     const out = near(pz.at).map(r => { const e = edge(pz.at, r), m = cost(pz, pz.at, r), why = [];
-      if (pz.seal.includes(e) && !pz.cut.includes(e)) why.push('a sealed door to cut'); if (pz.thin.includes(r)) why.push('no air in there'); if (pz.grown.includes(r)) why.push('the walls grown over');
+      if (LONG_WHY[e]) why.push(LONG_WHY[e]); if (pz.seal.includes(e) && !pz.cut.includes(e)) why.push('a sealed door to cut'); if (pz.thin.includes(r)) why.push('no air in there'); if (pz.grown.includes(r)) why.push('the walls grown over');
       return { id: r, label: `Into ${roomName(r)}`, sub: `${m} minutes${why.length ? ': ' + why.join(', ') : ''}${pz.seen.includes(r) ? '' : ' · not yet seen'}`, mins: m, map: true }; });   // map: moved by tapping the plan (js/ui.js), not a button
     if (pz.at === 'collar' && pz.turns) out.unshift({ id: 'home', label: 'Undock, and bring them home', sub: pz.got ? 'With what they found' : 'Without an answer', mins: 0, home: true });
     return out;
@@ -416,9 +433,9 @@ LF.PUZZLES.walk = {
       const dx = r.x - here.x, dy = r.y - here.y, l = Math.hypot(dx, dy) || 1, nx = -dy / l * 8, ny = dx / l * 8;   // beside the line, not on it
       return `<text class="cost" x="${Math.round((here.x + r.x) / 2 + nx)}" y="${Math.round((here.y + r.y) / 2 + ny + 3)}">${m}m${sealed ? ' cut' : ''}</text>`; }).join('');
     const nodes = Object.entries(ROOMS).map(([id, r]) => { const can = go.includes(id), cls = [id === pz.at ? 'at' : '', pz.seen.includes(id) ? 'seen' : '', pz.grown.includes(id) && pz.seen.includes(id) ? 'grown' : '', pz.thin.includes(id) && pz.seen.includes(id) ? 'thin' : '', can ? 'go' : ''].filter(Boolean).join(' ');
-      return `<g class="${cls}"${can ? ` data-act="pz" data-v="${id}" role="button" aria-label="Go to ${r.name}"` : ''}>${can ? `<circle class="hit" cx="${r.x}" cy="${r.y}" r="20"/><circle class="ring" cx="${r.x}" cy="${r.y}" r="12"/>` : ''}<circle cx="${r.x}" cy="${r.y}" r="${id === pz.at ? 11 : 8}"/><text x="${r.x + (r.lx || 0)}" y="${r.y + (r.ly || 18) + ((r.ly || 18) > 0 ? 3 : 0)}">${r.name.replace(/^the /, '')}</text></g>`; }).join('');
+      return `<g class="${cls}"${can ? ` data-act="pz" data-v="${id}" role="button" aria-label="Go to ${r.name}"` : ''}>${can ? `<circle class="hit" cx="${r.x}" cy="${r.y}" r="11"/><circle class="ring" cx="${r.x}" cy="${r.y}" r="9"/>` : ''}<circle cx="${r.x}" cy="${r.y}" r="${id === pz.at ? 7 : 5}"/>${can || id === pz.at ? `<text x="${r.x + (r.lx || 0)}" y="${r.y + (r.ly || 18) + ((r.ly || 18) > 0 ? 3 : 0)}">${r.name.replace(/^the /, '')}</text>` : ''}</g>`; }).join('');   // only where they are and where they can go is named: thirteen labels do not fit a phone
     const air = Math.max(0, pz.air), b = back(pz);
-    return { svg: `<svg viewBox="0 0 300 168" role="img" aria-label="The ship, compartment by compartment">${lines.join('')}${costs}${nodes}</svg>`,
+    return { svg: `<svg viewBox="0 34 320 138" role="img" aria-label="The ship, compartment by compartment"><image href="art/walk/plan.webp" x="0" y="0" width="320" height="213" class="plan"/>${lines.join('')}${costs}${nodes}</svg>`, pic: `art/walk/${pz.at}.webp`, picAlt: roomName(pz.at),
       stats: [['time', `${air} minutes of air${pz.done ? '' : ` · ${b === Infinity ? '?' : b} back to the collar`}`], ['people', `${pz.party} of four`], ['unknown', `${pz.clues} found`]],
       bar: [air, pz.air0, air - b < 10], log: pz.log, heard: pz.heard };
   },
@@ -426,9 +443,12 @@ LF.PUZZLES.walk = {
   bot(s, pz) {
     const told = ROOMS[pz.at].adj.find(r => r !== 'collar' && !pz.seen.includes(r) && (pz.heard + pz.log.join(' ')).includes(ROOMS[r].name));
     if (pz.got || pz.air - back(pz) < 15) return pz.at === 'collar' ? 'home' : LF.walkPath(pz, pz.at, 'collar').path[0];
-    if (told) return told;
-    const un = Object.keys(ROOMS).filter(r => !pz.seen.includes(r)).map(r => [r, LF.walkPath(pz, pz.at, r)]).sort((a, c) => a[1].mins - c[1].mins)[0];
-    return un ? un[1].path[0] : pz.at === 'collar' ? 'home' : LF.walkPath(pz, pz.at, 'collar').path[0];
+    const fits = r => pz.air - LF.walkPath(pz, pz.at, r).mins - (pz.seen.includes(r) ? 0 : TURN) - LF.walkPath(pz, r, 'collar').mins >= 1;   // the whole way there, a find there, and the way back
+    if (told && fits(told)) return told;
+    const aim = !pz.got && pz.heard && Object.keys(ROOMS).find(r => !pz.seen.includes(r) && pz.heard.includes(ROOMS[r].name));   // heard from further off: make for it
+    if (aim && fits(aim)) return LF.walkPath(pz, pz.at, aim).path[0];
+    const un = Object.keys(ROOMS).filter(r => !pz.seen.includes(r)).map(r => [r, LF.walkPath(pz, pz.at, r)]).sort((a, c) => (a[1].mins - 3 * ROOMS[a[0]].adj.length) - (c[1].mins - 3 * ROOMS[c[0]].adj.length))[0];   // hubs before dead ends: from a hub you hear more
+    return un && fits(un[0]) ? un[1].path[0] : pz.at === 'collar' ? 'home' : LF.walkPath(pz, pz.at, 'collar').path[0];
   },
 };
 /* any puzzle: its moves, and one move (UI and sim). Returns the sound the move makes, or null if it was not allowed. */
@@ -443,7 +463,7 @@ const WALK_END = {
 B('boarding', { id: 'qs.walk', tone: 'crisis', title: 'An Hour of Air', urgent: true, w: 10, repeat: 6, puzzle: 'walk',
   setup: s => { const t = T(s), p = dbl(s, t), c = { k: deepKey(t), up: ups(s), fled: t.fled || 0, dbl: p ? p.name : t.dblName, dblFirst: p ? p.first : (t.dblName || '').split(' ')[0], mo: moUp(s, t) };
     c.pz = LF.newWalk(s, c); return c; },
-  text: (s, c) => `The lander has a hard seal on the collar. Four of the watch are in the airlock, suited, with an hour of air each and a cutter between them, and they are waiting to be told where to go.\n\n[[x19]] "Inner door's green. Your call, every step of it."\n\nShe is nine compartments end to end. Nobody on the ground knows which one the trouble is in.`,
+  text: (s, c) => `The lander has a hard seal on the collar. Four of the watch are in the airlock, suited, with an hour of air each and a cutter between them, and they are waiting to be told where to go.\n\n[[x19]] "Inner door's green. Your call, every step of it."\n\nShe is thirteen compartments end to end, from the bridge in the nose to the drive down the boom. Nobody on the ground knows which one the trouble is in.`,
   choices: [
     { show: (s, c) => !c.pz || !c.pz.turns, label: 'Leave it to the party lead, by the book', note: 'They go in on the ten-minute reports, and you hear about it when it happens.', hint: 'unknown', info: [['yield', 'Nobody on the ground making the calls'], ['later', 'The party']],
       out: { text: 'The order goes up: by the book. The inner door opens, and the first report comes on the ten minutes.', fx: s => ({ do: s2 => LF.cue(s2, 'qs.deep', 0, 1) }) } },

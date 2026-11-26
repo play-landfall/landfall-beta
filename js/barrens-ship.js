@@ -34,6 +34,7 @@ X.WALK_LINE.double = {
   crew: c => `One bunk on the crew deck has ${c.dblFirst}'s name on the locker. The mattress is pressed down in a shape nobody would sleep in: long, and bent in two places.`,
   galley: 'The galley bin is full of ration packs, a meal\'s worth a day for months, each one opened and put in the bin untouched.',
   bankB: c => `${c.dblFirst}'s own pod in bank B is open, and dry, and logged as opened on the day of the flight.`,
+  hydro: 'In the workshop at the end of the hydroponics ring, a mirror has been taken off the wall and propped on the bench, with a stool in front of it.',
 };
 X.NEAR.double = () => 'The intercom clicks on, and somebody breathes into it, slowly, in time with the party leader\'s own breathing.';
 X.TARGET.double = r => `Someone is talking quietly in ${ROOMS[r].name}: one voice, taking both sides of the conversation the party had in the lander on the way up.`;

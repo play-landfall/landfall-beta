@@ -463,7 +463,7 @@ function cardHTML() {
 function pzHTML(pz) {
   const P = LF.PUZZLES[pz.kind]; if (!P || !P.draw) return '';
   const d = P.draw(s, pz), mv = LF.pzMoves(s), chips = mv.filter(m => m.chip), rest = mv.filter(m => !m.chip && !m.map), onMap = mv.some(m => m.map);
-  return `<div class="pz ${pz.kind}${P.rooms || pz.kind === 'survey' ? ' walk' : ''}">${d.note ? `<div class="pznote">${esc(d.note).replace(/\n/g, '<br>')}</div>` : ''}${d.svg || ''}${d.html || ''}`
+  return `<div class="pz ${pz.kind}${P.rooms || pz.kind === 'survey' ? ' walk' : ''}">${d.note ? `<div class="pznote">${esc(d.note).replace(/\n/g, '<br>')}</div>` : ''}${d.pic ? `<img class="pzpic" src="${d.pic}" alt="${esc(d.picAlt || '')}" onerror="this.remove()">` : ''}${d.svg || ''}${d.html || ''}`
     + (d.stats ? `<div class="pzstat">${d.stats.map(([k, t]) => `<span>${ic(k)}${esc(t)}</span>`).join('')}</div>` : '')
     + (d.bar ? `<div class="pbar"><i style="transform:scaleX(${d.bar[0] / d.bar[1]})"${d.bar[2] ? ' class="low"' : ''}></i></div>` : '')
     + `<div class="pzlog">${(d.log || []).map(t => talkHTML(t)).join('')}${d.heard ? `<p class="heard">${esc(d.heard)}</p>` : ''}</div>`

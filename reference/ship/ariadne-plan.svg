@@ -163,16 +163,17 @@
 <path d="M1250 360 L1270 330 L1350 330 L1372 352 L1350 362 L1260 362 Z" fill="#e8dcc0" stroke="#3b4a52" stroke-width="3"/>
 <rect x="1270" y="338" width="70" height="10" fill="#d8782c"/>
 <line x1="95" y1="450" x2="640" y2="450" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
-<line x1="640" y1="450" x2="985" y2="450" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
-<line x1="985" y1="450" x2="762" y2="238" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
-<line x1="985" y1="450" x2="880" y2="382" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
-<line x1="985" y1="450" x2="880" y2="520" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
-<line x1="985" y1="450" x2="1010" y2="382" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
-<line x1="985" y1="450" x2="1196" y2="222" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
+<line x1="640" y1="450" x2="812" y2="450" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
+<line x1="812" y1="450" x2="762" y2="238" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
+<line x1="812" y1="450" x2="880" y2="382" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
+<line x1="812" y1="450" x2="880" y2="520" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
+<line x1="812" y1="450" x2="1110" y2="450" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
+<line x1="1110" y1="450" x2="1010" y2="382" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
+<line x1="1110" y1="450" x2="1196" y2="222" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
 <line x1="1196" y1="222" x2="1222" y2="330" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
 <line x1="1222" y1="330" x2="1196" y2="680" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
 <line x1="1196" y1="222" x2="1196" y2="680" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
-<line x1="985" y1="450" x2="1300" y2="395" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
+<line x1="1110" y1="450" x2="1300" y2="395" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
 <line x1="1300" y1="395" x2="1470" y2="450" stroke="#f26b3a" stroke-width="3" stroke-dasharray="8 6"/>
 <circle cx="95" cy="450" r="11" fill="#f26b3a" stroke="#f3ead2" stroke-width="3"/>
 <text x="95" y="390" fill="#f3ead2" stroke="#1c2740" stroke-width="6" paint-order="stroke" font-family="Nunito, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Drive</text>
@@ -180,8 +181,10 @@
 <text x="640" y="368" fill="#f3ead2" stroke="#1c2740" stroke-width="6" paint-order="stroke" font-family="Nunito, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Hold</text>
 <circle cx="762" cy="238" r="11" fill="#f26b3a" stroke="#f3ead2" stroke-width="3"/>
 <text x="762" y="212" fill="#f3ead2" stroke="#1c2740" stroke-width="6" paint-order="stroke" font-family="Nunito, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Hydroponics + workshop</text>
-<circle cx="985" cy="450" r="11" fill="#f26b3a" stroke="#f3ead2" stroke-width="3"/>
-<text x="985" y="510" fill="#f3ead2" stroke="#1c2740" stroke-width="6" paint-order="stroke" font-family="Nunito, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Spine</text>
+<circle cx="1110" cy="450" r="11" fill="#f26b3a" stroke="#f3ead2" stroke-width="3"/>
+<text x="1110" y="510" fill="#f3ead2" stroke="#1c2740" stroke-width="6" paint-order="stroke" font-family="Nunito, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Spine (fore hub)</text>
+<circle cx="812" cy="450" r="11" fill="#f26b3a" stroke="#f3ead2" stroke-width="3"/>
+<text x="812" y="510" fill="#f3ead2" stroke="#1c2740" stroke-width="6" paint-order="stroke" font-family="Nunito, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Spine (aft hub)</text>
 <circle cx="880" cy="382" r="11" fill="#f26b3a" stroke="#f3ead2" stroke-width="3"/>
 <text x="880" y="356" fill="#f3ead2" stroke="#1c2740" stroke-width="6" paint-order="stroke" font-family="Nunito, sans-serif" font-size="22" font-weight="700" text-anchor="middle">Bank B</text>
 <circle cx="880" cy="520" r="11" fill="#f26b3a" stroke="#f3ead2" stroke-width="3"/>
