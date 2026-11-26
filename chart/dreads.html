@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dread Map</title>
+<!-- The dread mapper for REWRITE-PLAN.md: each dread as a flow chart (truths, phases, cards, endings), with picks for
+     planet, part, the fixed truth and the ending to build towards. Data: docs/dread-map-data.js, made by
+     `node tools/dread-map.js`. Picks live in this browser (localStorage); Export gives the JSON to hand back. -->
+<style>
+:root { --bg:#f6f3ec; --panel:#fff; --ink:#1d2433; --dim:#5a6375; --line:#d9d3c5; --accent:#b8562a; --dark:#8e2b2b; --ok:#2f7a45; --sel:#fbe7d6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#141a26; --panel:#1c2433; --ink:#e9e3d4; --dim:#a2abbd; --line:#2e3a50; --accent:#e08850; --dark:#e07070; --ok:#7fbf8f; --sel:#3a2a20; } }
+:root[data-theme="dark"] { --bg:#141a26; --panel:#1c2433; --ink:#e9e3d4; --dim:#a2abbd; --line:#2e3a50; --accent:#e08850; --dark:#e07070; --ok:#7fbf8f; --sel:#3a2a20; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 system-ui, sans-serif; }
+header { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 16px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--bg); z-index:3; }
+header h1 { font-size:16px; margin:0 8px 0 0; }
+button, select, textarea, input { font:inherit; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:4px 8px; }
+button { cursor:pointer; } button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+.wrap { display:grid; grid-template-columns:220px minmax(0,1fr) 380px; min-height:calc(100vh - 48px); }
+nav { border-right:1px solid var(--line); padding:8px; overflow-y:auto; max-height:calc(100vh - 48px); position:sticky; top:48px; }
+nav .grp { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:12px 6px 4px; }
+nav a { display:block; padding:4px 8px; border-radius:6px; color:var(--ink); text-decoration:none; cursor:pointer; }
+nav a.cur { background:var(--sel); font-weight:600; }
+nav a small { color:var(--dim); display:block; font-size:11px; }
+main { padding:12px 16px; min-width:0; }
+aside { border-left:1px solid var(--line); padding:12px; overflow-y:auto; max-height:calc(100vh - 48px); position:sticky; top:48px; }
+h2 { margin:0 0 4px; font-size:20px; } h3 { margin:16px 0 6px; font-size:15px; }
+.premise { color:var(--dim); font-size:13px; max-width:900px; }
+.picks { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0; padding:8px; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
+.picks label { font-size:12px; color:var(--dim); display:flex; flex-direction:column; gap:2px; }
+.picks textarea { width:100%; min-height:40px; }
+.chart { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:8px; overflow-x:auto; }
+.list > div { padding:6px 8px; border:1px solid var(--line); border-radius:6px; margin:4px 0; background:var(--panel); cursor:pointer; }
+.list > div.fav { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent) inset; }
+.list b { font-family:ui-monospace, monospace; font-size:12px; }
+.tag { font-size:11px; padding:0 6px; border-radius:10px; border:1px solid var(--line); color:var(--dim); margin-left:4px; }
+.dark { color:var(--dark); font-weight:600; }
+aside .opt { border-top:1px solid var(--line); padding:6px 0; }
+aside .out { font-size:13px; color:var(--dim); margin:2px 0 2px 10px; white-space:pre-wrap; }
+aside .txt { white-space:pre-wrap; font-size:13px; }
+table { border-collapse:collapse; width:100%; background:var(--panel); } td, th { border:1px solid var(--line); padding:4px 6px; text-align:left; vertical-align:top; font-size:13px; }
+.hint { color:var(--dim); font-size:12px; }
+@media (max-width: 900px) { .wrap { grid-template-columns:1fr; } nav, aside { position:static; max-height:none; border:0; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Dread map</h1>
+  <button id="bOne" class="on">One dread</button>
+  <button id="bAll">Overview</button>
+  <span style="flex:1"></span>
+  <button id="bExport">Export picks</button>
+  <button id="bImport">Import</button>
+  <span class="hint">Picks are saved in this browser.</span>
+</header>
+<div class="wrap">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+  <aside id="side"><p class="hint">Click a card, truth or ending in the chart to read it here.</p></aside>
+</div>
+<script src="dread-map-data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+'use strict';
+const D = window.DREADS || [];
+const PLANETS = ['', 'Barren', 'Verdant', 'Poseidon', 'Shared (all three)', 'Not used'];
+const PARTS = ['', 'Part 2 (years 0-5)', 'Part 3 (years 20-25)', 'Part 1 foreshadow only'];
+const KEY = 'dreadmap.v1';
+let picks = {}; try { picks = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(picks)); } catch (e) {} };
+const P = id => (picks[id] = picks[id] || {});
+let cur = D[0] && D[0].id, mode = 'one';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: dark ? 'dark' : 'default', flowchart: { useMaxWidth: false, htmlLabels: true } });
+
+// Card text is the source of a template: fold each ${...} (nested too) to an ellipsis and show the tags as names.
+function clean(src, inner) {
+  if (!src) return '';
+  let s = String(src).replace(/^\(?[\w\s,]*\)?\s*=>\s*/, '');
+  if (!inner && !/^[`'"]/.test(s)) { const l = litOf(s); if (l) s = '`' + l + '`'; }   // a function that picks between lines: show the first
+  let o = '', i = 0;
+  while (i < s.length) {
+    if (s[i] === '$' && s[i + 1] === '{') {
+      const a = i + 2; let d = 1; i += 2; while (i < s.length && d) { if (s[i] === '{') d++; else if (s[i] === '}') d--; i++; }
+      const lit = litOf(s.slice(a, i - 1));   // a conditional piece of prose (a ? `X` : `Y`): show its first branch
+      o += lit && lit.length > 25 ? '⟦' + clean(lit, true) + '⟧' : '…';
+    }
+    else o += s[i++];
+  }
+  return o.replace(/^[`'"{]\s*|[`'"]\s*;?\s*}?\s*$/g, '').replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\"/g, '"')
+    .replace(/\[\[(\w+)\]\]/g, (m, k) => '▸' + k.toUpperCase() + ':').replace(/…(\s*…)+/g, '…');
+}
+// The first template literal in an expression, with its own ${} pieces kept whole for clean() to fold.
+function litOf(x) {
+  const b = x.indexOf('`'); if (b < 0) { const m = x.match(/'((?:[^'\\]|\\.){25,})'/); return m ? m[1] : null; }
+  let i = b + 1, d = 0;
+  while (i < x.length) { if (x[i] === '\\') { i += 2; continue; } if (x[i] === '$' && x[i + 1] === '{') { d++; i += 2; continue; } if (d && x[i] === '}') { d--; i++; continue; } if (!d && x[i] === '`') return x.slice(b + 1, i); i++; }
+  return null;
+}
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const lab = s => String(s || '').replace(/["`]/g, "'").replace(/[<>{}[\]()#;|]/g, ' ').slice(0, 60);
+const groupOf = d => ['notmine', 'friend', 'hush', 'made'].includes(d.id) ? 'Next generation (Part 3)' : ['shipmind', 'quiet', 'orders'].includes(d.id) ? 'Ship and mind' : 'Dreads';
+
+function drawNav() {
+  const groups = {};
+  for (const d of D) (groups[groupOf(d)] = groups[groupOf(d)] || []).push(d);
+  let h = '';
+  for (const g of ['Dreads', 'Ship and mind', 'Next generation (Part 3)']) {
+    if (!groups[g]) continue;
+    h += `<div class="grp">${g}</div>`;
+    for (const d of groups[g]) {
+      const p = picks[d.id] || {};
+      const sub = [p.planet, p.part && p.part.split(' ')[0] + ' ' + p.part.split(' ')[1], p.rate ? '★'.repeat(p.rate) : ''].filter(Boolean).join(' · ');
+      h += `<a data-id="${d.id}" class="${d.id === cur && mode === 'one' ? 'cur' : ''}">${esc(d.name)}<small>${esc(sub) || '&nbsp;'}</small></a>`;
+    }
+  }
+  nav.innerHTML = h;
+  nav.querySelectorAll('a').forEach(a => a.onclick = () => { cur = a.dataset.id; mode = 'one'; render(); });
+}
+
+function sel(name, list, val) { return `<select data-k="${name}">${list.map(x => `<option ${x === val ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>`; }
+
+// How often a card comes against the busiest card of its own phase (runs that end the dread early reach later phases
+// less, so the dread's busiest card would be the wrong yardstick): '' always, 'sometimes', or 'rare'.
+function often(d, c) {
+  const ph = c.phases[0], top = Math.max(0, ...d.cards.filter(x => x.phases[0] === ph).map(x => x.fires || 0));
+  if (!top || c.fires == null) return '';
+  const r = c.fires / top;
+  return r < 0.25 ? 'rare' : r < 0.6 ? 'sometimes' : '';
+}
+function chartSrc(d) {
+  const p = picks[d.id] || {};
+  const L = ['flowchart TD'];
+  L.push('classDef truth fill:#e8eefc,stroke:#5470b0,color:#1d2433');
+  L.push('classDef card fill:#fff7ec,stroke:#b8562a,color:#1d2433');
+  L.push('classDef dk fill:#fbe3e3,stroke:#8e2b2b,color:#1d2433');
+  L.push('classDef cardS fill:#fffdf8,stroke:#b8562a,stroke-dasharray:5 4,color:#6a6a6a');
+  L.push('classDef dkS fill:#fdf3f3,stroke:#8e2b2b,stroke-dasharray:5 4,color:#6a6a6a');
+  L.push('classDef fin fill:#e9f5ec,stroke:#2f7a45,color:#1d2433');
+  L.push('classDef fav fill:#ffd9a8,stroke:#b8562a,stroke-width:3px,color:#1d2433');
+  L.push('classDef pick fill:#c9d8ff,stroke:#2b4c9a,stroke-width:3px,color:#1d2433');
+  if (d.truths.length) {
+    L.push('subgraph T["Secret truth: one of"]');
+    d.truths.forEach((t, i) => { L.push(`tr${i}["${lab(t)}"]:::${p.truth === t ? 'pick' : 'truth'}`); L.push(`click tr${i} call showTruth("${i}")`); });
+    L.push('end');
+  }
+  const ph = d.phases.length ? d.phases : ['(no phase)'];
+  ph.forEach((name, i) => {
+    L.push(`subgraph P${i}["${i + 1}. ${lab(name)}"]`);
+    L.push('direction TB');
+    const cs = d.cards.map((c, j) => [c, j]).filter(([c]) => (c.phases.length ? c.phases[0] : '(no phase)') === name);
+    if (!cs.length) L.push(`e${i}[" "]`);
+    // Cards in a phase come in the order they are written, one after another. One that fires well under the dread's own
+    // rate only comes when something holds (a truth, an earlier choice, who is there): dashed, with a dotted way in.
+    cs.forEach(([c, j], n) => {
+      const dk = c.options.some(o => o.dark), how = often(d, c);
+      L.push(`c${j}["${lab(c.title || c.id)}<br/><small>${lab(c.id)}${c.fires != null ? ' · ' + c.fires + '/run' : ''}${how ? ' · ' + how.toUpperCase() : ''}</small>"]:::${(dk ? 'dk' : 'card') + (how ? 'S' : '')}`);
+      L.push(`click c${j} call showCard("${j}")`);
+      if (n) L.push(`c${cs[n - 1][1]} ${how || often(d, cs[n - 1][0]) ? '-.->' : '-->'} c${j}`);
+    });
+    L.push('end');
+    if (i === 0 && d.truths.length) L.push(`T --> P0`);
+    if (i > 0) L.push(`P${i - 1} --> P${i}`);
+  });
+  if (d.endings.length) {
+    L.push('subgraph E["Endings"]');
+    d.endings.forEach((e, i) => {
+      const k = e.key + (e.truth ? ' / ' + e.truth : '');
+      L.push(`en${i}["${lab(k)}"]:::${p.ending === k ? 'fav' : 'fin'}`);
+      L.push(`click en${i} call showEnd("${i}")`);
+    });
+    L.push('end');
+    L.push(`P${ph.length - 1} --> E`);
+  }
+  return L.join('\n');
+}
+
+window.showCard = j => {
+  const c = D.find(x => x.id === cur).cards[+j];
+  let h = `<h3>${esc(c.title)}</h3><div class="hint">${esc(c.id)} · ${esc(c.phases.join(', '))} · ${esc(c.view || '')}${c.fires != null ? ' · fires ' + c.fires + ' a run' : ''}</div>`;
+  h += `<p class="txt">${esc(clean(c.text))}</p>`;
+  if (c.ask) h += `<p><i>${esc(c.ask)}</i></p>`;
+  for (const o of c.options) {
+    h += `<div class="opt"><div class="${o.dark ? 'dark' : ''}">${o.dark ? '☠ ' : '• '}${esc(clean(o.label))}</div>`;
+    if (o.note) h += `<div class="hint">${esc(clean(o.note))}</div>`;
+    if (o.test) h += `<div class="hint">test ${o.test.base}${o.test.by && o.test.by.length ? ', helped by ' + esc(o.test.by.join(', ')) : ''}</div>`;
+    const t = o.text || {};
+    if (t.out) h += `<div class="out">→ ${esc(clean(t.out))}</div>`;
+    if (t.ok) h += `<div class="out">✔ ${esc(clean(t.ok))}</div>`;
+    if (t.bad) h += `<div class="out">✘ ${esc(clean(t.bad))}</div>`;
+    h += '</div>';
+  }
+  side.innerHTML = h;
+};
+window.showTruth = i => {
+  const d = D.find(x => x.id === cur), t = d.truths[+i];
+  side.innerHTML = `<h3>Truth: ${esc(t)}</h3><p class="txt">${esc(d.truthText[t] || '(no line found for it in the file)')}</p>
+    <p class="hint">The line is the last one in the thread's file keyed by this truth, usually the reveal at the end. Some are evidence lines instead.</p>
+    <button onclick="pickSet('truth', ${JSON.stringify(t).replace(/"/g, '&quot;')})">Fix this truth for the rewrite</button>`;
+};
+window.showEnd = i => {
+  const d = D.find(x => x.id === cur), e = d.endings[+i], k = e.key + (e.truth ? ' / ' + e.truth : '');
+  side.innerHTML = `<h3>Ending: ${esc(k)}</h3><p class="txt">${esc(e.text || '(no chronicle line)')}</p>
+    <button onclick="pickSet('ending', ${JSON.stringify(k).replace(/"/g, '&quot;')})">This is the ending to build towards</button>`;
+};
+window.pickSet = (k, v) => { P(cur)[k] = v; save(); render(); };
+
+async function renderOne() {
+  const d = D.find(x => x.id === cur), p = picks[d.id] || {};
+  const ends = [''].concat(d.endings.map(e => e.key + (e.truth ? ' / ' + e.truth : '')));
+  let h = `<h2>${esc(d.name)} <span class="tag">${esc(d.id)}</span><span class="tag">${d.cards.length} cards</span></h2>
+    <div class="premise">${esc(d.premise)}</div>
+    <div class="picks">
+      <label>Planet ${sel('planet', PLANETS, p.planet || '')}</label>
+      <label>Part ${sel('part', PARTS, p.part || '')}</label>
+      <label>Fixed truth ${sel('truth', [''].concat(d.truths), p.truth || '')}</label>
+      <label>Ending to build towards ${sel('ending', ends, p.ending || '')}</label>
+      <label>How much I like it ${sel('rate', ['', '1', '2', '3', '4', '5'], String(p.rate || ''))}</label>
+      <label style="flex:1;min-width:240px">Notes <textarea data-k="notes">${esc(p.notes || '')}</textarea></label>
+    </div>
+    <p class="hint">Phases run top to bottom, and so do the cards inside a phase: every solid card plays, in that order. A dashed card
+      (SOMETIMES or RARE) only comes when something holds, such as a truth, an earlier choice or who is present. That's judged by how often it fired in
+      300 sim games against the busiest card in the same phase. Red cards have a dark option.</p>
+    <div class="chart" id="chart">Drawing…</div>
+    <h3>Truths</h3><div class="list">${d.truths.map((t, i) => `<div class="${p.truth === t ? 'fav' : ''}" onclick="showTruth(${i})"><b>${esc(t)}</b> ${esc((d.truthText[t] || '').slice(0, 220))}</div>`).join('') || '<p class="hint">None found.</p>'}</div>
+    <h3>Endings</h3><div class="list">${d.endings.map((e, i) => { const k = e.key + (e.truth ? ' / ' + e.truth : ''); return `<div class="${p.ending === k ? 'fav' : ''}" onclick="showEnd(${i})"><b>${esc(k)}</b> ${esc(e.text)}</div>`; }).join('') || '<p class="hint">None found.</p>'}</div>`;
+  main.innerHTML = h;
+  main.querySelectorAll('[data-k]').forEach(el => el.oninput = el.onchange = () => {
+    P(cur)[el.dataset.k] = el.dataset.k === 'rate' ? +el.value || 0 : el.value; save();
+    if (el.tagName === 'SELECT') render(); else drawNav();
+  });
+  try { const { svg, bindFunctions } = await mermaid.render('m' + Date.now(), chartSrc(d)); chart.innerHTML = svg; bindFunctions && bindFunctions(chart); }
+  catch (e) { chart.innerHTML = '<pre>' + esc(e.message || e) + '\n\n' + esc(chartSrc(d)) + '</pre>'; }
+}
+
+function renderAll() {
+  const by = {};
+  for (const d of D) { const pl = (picks[d.id] || {}).planet || 'Unassigned'; (by[pl] = by[pl] || []).push(d); }
+  let h = `<h2>Overview</h2><p class="hint">The aim from REWRITE-PLAN.md: three dreads per planet for Part 2 (one or two of its own, one or two shared), and Part 3's hand-picked too.</p>`;
+  h += '<table><tr><th>Planet</th><th>Part 2</th><th>Part 3</th><th>Other</th></tr>';
+  for (const pl of PLANETS.slice(1).concat(['Unassigned'])) {
+    const ds = by[pl] || [], cell = f => ds.filter(f).map(d => { const p = picks[d.id] || {}; return `<div><a href="#" onclick="cur='${d.id}';mode='one';render();return false">${esc(d.name)}</a>${p.rate ? ' ' + '★'.repeat(p.rate) : ''}${p.truth ? ` <span class="tag">${esc(p.truth)}</span>` : ''}${p.ending ? ` <span class="tag">→ ${esc(p.ending)}</span>` : ''}</div>`; }).join('');
+    h += `<tr><td><b>${esc(pl)}</b> (${ds.length})</td><td>${cell(d => /Part 2/.test((picks[d.id] || {}).part || ''))}</td><td>${cell(d => /Part 3/.test((picks[d.id] || {}).part || ''))}</td><td>${cell(d => !/Part [23]/.test((picks[d.id] || {}).part || ''))}</td></tr>`;
+  }
+  h += '</table><h3>Notes</h3>' + D.filter(d => (picks[d.id] || {}).notes).map(d => `<p><b>${esc(d.name)}</b>: ${esc(picks[d.id].notes)}</p>`).join('');
+  main.innerHTML = h;
+}
+
+function render() {
+  bOne.classList.toggle('on', mode === 'one'); bAll.classList.toggle('on', mode === 'all');
+  drawNav(); if (mode === 'one') renderOne(); else renderAll();
+}
+bOne.onclick = () => { mode = 'one'; render(); };
+bAll.onclick = () => { mode = 'all'; render(); };
+bExport.onclick = () => {
+  const txt = JSON.stringify(picks, null, 1);
+  try { navigator.clipboard.writeText(txt); } catch (e) {}
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.download = 'dread-picks.json'; a.click();
+  side.innerHTML = '<h3>Exported</h3><p class="hint">Downloaded as dread-picks.json and copied to the clipboard. Paste it to Claude or drop the file in the repo.</p><pre style="white-space:pre-wrap;font-size:11px">' + esc(txt) + '</pre>';
+};
+bImport.onclick = () => { const t = prompt('Paste exported picks JSON'); if (!t) return; try { picks = JSON.parse(t); save(); render(); } catch (e) { alert('Not valid JSON'); } };
+if (!D.length) main.innerHTML = '<p>No data. Run <code>node tools/dread-map.js</code>.</p>'; else render();
+</script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<title>Barrens Story Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Nunito:wght@400;600;800&display=swap">
+<style>
+/* Layout: one reading column; the whole-run chart, then a branch picker that writes the run out beside it (stacked on phones). */
+:root {
+  --bg: #f3efe6; --panel: #e8e1d3; --fg: #1f2638; --muted: #5d6475; --rust: #b4532a; --navy: #24324f; --line: #cfc6b4; --good: #3f7a52; --bad: #a23b2a;
+  --display: 'Cinzel', Georgia, serif; --body: 'Nunito', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121826; --panel: #1b2335; --fg: #ece5d6; --muted: #a2a8b8; --rust: #d9733f; --navy: #8fa6d6; --line: #2c3650; --good: #7fbf8e; --bad: #e07a63; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121826; --panel: #1b2335; --fg: #ece5d6; --muted: #a2a8b8; --rust: #d9733f; --navy: #8fa6d6; --line: #2c3650; --good: #7fbf8e; --bad: #e07a63; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 28px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1 { font: 700 clamp(28px, 5vw, 44px)/1.1 var(--display); letter-spacing: .04em; margin: 0 0 6px; text-wrap: balance; }
+h2 { font: 700 22px/1.2 var(--display); letter-spacing: .05em; margin: 40px 0 10px; color: var(--rust); }
+h3 { font: 800 13px/1.2 var(--body); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 18px 0 6px; }
+.lede { color: var(--muted); max-width: 68ch; margin: 0; }
+.chart { overflow-x: auto; background: var(--panel); border-radius: 18px; padding: 16px; margin-top: 12px; }
+.chart pre.mermaid { margin: 0; min-width: 760px; background: transparent; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+.legend b { color: var(--fg); }
+.picker { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 820px) { .picker { grid-template-columns: minmax(0, 1fr); } }
+fieldset { border: 0; padding: 0; margin: 0 0 14px; min-width: 0; }
+legend { font-weight: 800; font-size: 15px; margin-bottom: 6px; }
+legend small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+.opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.opts label { cursor: pointer; }
+.opts input { position: absolute; opacity: 0; pointer-events: none; }
+.opts span { display: inline-block; padding: 6px 12px; border-radius: 999px; background: var(--panel); font-size: 14px; border: 1px solid var(--line); }
+.opts input:checked + span { background: var(--navy); color: var(--bg); border-color: var(--navy); }
+.opts input:focus-visible + span { outline: 2px solid var(--rust); outline-offset: 2px; }
+.opts input:disabled + span { opacity: .4; cursor: not-allowed; }
+.part { font: 700 14px/1 var(--display); letter-spacing: .08em; color: var(--rust); margin: 22px 0 10px; border-top: 1px solid var(--line); padding-top: 14px; }
+.part:first-child { margin-top: 0; border-top: 0; padding-top: 0; }
+.run { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); background: var(--panel); border-radius: 18px; padding: 18px 20px; }
+@media (max-width: 820px) { .run { position: static; } }
+.run h3:first-child { margin-top: 0; }
+.run p { margin: 0 0 10px; }
+.tag { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; background: var(--bg); color: var(--muted); margin-right: 4px; }
+.tag.good { color: var(--good); } .tag.bad { color: var(--bad); }
+.end { font: 700 18px/1.3 var(--display); color: var(--rust); margin-top: 14px; }
+.states { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); padding-top: 10px; margin-top: 12px; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; }
+button { font: 700 14px var(--body); background: var(--rust); color: #fff; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer; }
+button.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+button:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+.count { color: var(--muted); font-size: 14px; }
+</style>
+
+<div class="wrap">
+  <h1>Barrens Story Map</h1>
+  <p class="lede">How one run of Landfall plays out across the three parts, and where it branches. The top chart is the whole run. Below it, pick a branch at each choice and read how that run would go. Draft from STORY-ARCS.md on the <b>barrens</b> branch: the truths are fixed and the endings are earned.</p>
+
+  <h2>The whole run</h2>
+  <div class="chart"><pre class="mermaid">
+flowchart LR
+  classDef spine fill:#24324f,stroke:#24324f,color:#f3efe6
+  classDef pick fill:#b4532a,stroke:#b4532a,color:#fff
+  classDef dread fill:#e8e1d3,stroke:#b4532a,color:#1f2638,stroke-width:2px
+  classDef end1 fill:#f3efe6,stroke:#5d6475,color:#1f2638
+  classDef grey fill:#ddd,stroke:#aaa,color:#888,stroke-dasharray:4
+
+  subgraph P1["PART 1 · THE CROSSING · Earth years 0–41"]
+    direction TB
+    a1[Launch for Tau Ceti<br/>all six awake, years 0–2]:::spine --> a2[Year 2: everyone sleeps]:::spine
+    a2 --> a3{{Year 7.6: Earth's order<br/>senior crew woken}}:::pick
+    a3 -->|divert| a4[Two-person shifts<br/>the tapes from Barrens]:::spine
+    a3 -.->|carry on| tc[Tau Ceti<br/>not in this version]:::grey
+    a4 --> t{{The tapes:<br/>listen · ration · stop}}:::pick
+    t --> a5[The tapes stop<br/>the last is the wake-chorus]:::spine
+    a5 --> a6[Year 41: arrival<br/>the Persephone dark]:::spine
+  end
+
+  subgraph P2["PART 2 · LANDFALL · local years 0–5"]
+    direction TB
+    b1{{Board the Persephone?}}:::pick
+    b1 -->|board| b2{{Salvage:<br/>none · parts · everything}}:::pick
+    b1 -->|straight down| b3
+    b2 --> b3{{Settle: nearby · far}}:::pick
+    b3 --> b4[The empty settlement<br/>tables laid, nothing else]:::spine
+    b4 --> d1[[Dread 1 · ONE TOO MANY<br/>two extra at the table, the radio smashed]]:::dread
+    b4 --> d2[[Dread 2 · THE WAKE<br/>the one on the ground<br/>voice, then shape, then face]]:::dread
+    d1 <-->|is it them?| d2
+    d1 --> up[A lander goes up<br/>the only way to reach the ship]:::spine
+    d1 & d2 --> fd{{The two found:<br/>heard · silenced · fled}}:::pick
+    fd --> d3[[Dread 3 · THE QUIET SHIP<br/>the one from orbit, or the one that rode up<br/>or both]]:::dread
+    b2 -. rider unseen: Route A .-> d3
+    up -. Route B rides it .-> d3
+    d3 --> b5[Year 5 splash]:::spine
+  end
+
+  subgraph P3["PART 3 · THE NEW GENERATION · +50 Earth years"]
+    direction TB
+    c0[New leads<br/>old crew turn hard]:::spine --> c1[A light in the sky]:::spine
+    c1 --> c2[[THE THIRD SHIP<br/>arrives mid-part, wants a Mocker]]:::dread
+    c0 --> c3[[THE HUSH<br/>near-perfect mimics inside the towns<br/>then a frenzy]]:::dread
+    c0 --> c4[[THE FALLEN<br/>one of your own, from the dark ship<br/>they fed it the others]]:::dread
+    c2 <--> c3
+    c2 <--> c4
+    c3 <--> c4
+    c2 & c3 & c4 --> c5{{Who holds Barrens}}:::pick
+    c5 --> e1[The newcomers]:::end1
+    c5 --> e2[Born here]:::end1
+    c5 --> e3[The old crew]:::end1
+    c5 --> e4[Nobody: the Mocker]:::end1
+  end
+
+  a6 --> b1
+  b5 --> c0
+  </pre></div>
+  <div class="legend"><span><b>Navy</b> always happens</span><span><b>Rust</b> the player's choice</span><span><b>Outlined</b> a dread or big arc</span><span><b>Dotted</b> one of two routes</span><span><b>Grey</b> not in this version</span></div>
+
+  <h2>Play a run</h2>
+  <div class="btns"><button type="button" id="rand">Random run</button><button type="button" class="ghost" id="reset">Reset</button><span class="count" id="count"></span></div>
+  <div class="picker">
+    <form id="f" autocomplete="off"></form>
+    <aside class="run" id="run" aria-live="polite"></aside>
+  </div>
+</div>
+
+<script>
+const B = [
+  { part: 'Part 1 · The Crossing' },
+  { id: 'told', q: 'Who hears the order', d: 'When the seniors are woken at year 7.6.', o: [['all', 'All six'], ['seniors', 'Seniors keep it']] },
+  { id: 'tapes', q: 'The tapes from Barrens', d: 'Listening finds clues and wears the crew down.', o: [['all', 'Listen to all'], ['ration', 'Ration them'], ['stop', 'Stop playing']] },
+  { id: 'wake', q: 'Waking a sleeper early', d: 'For company, or for a crisis.', o: [['no', 'Keep the roster'], ['yes', 'Wake one']] },
+  { id: 'report', q: 'Report to Earth', d: 'It decides what Earth knows 50 years on.', o: [['yes', 'Every year'], ['no', 'Go quiet']] },
+  { part: 'Part 2 · Landfall' },
+  { id: 'board', q: 'The Persephone', d: 'Dark in orbit. Nothing alive is seen.', o: [['yes', 'Board her'], ['no', 'Straight down']] },
+  { id: 'salv', q: 'Salvage', d: 'More cargo, more chance something comes across with it.', o: [['none', 'Nothing'], ['parts', 'Fuel and parts'], ['all', 'Everything']], need: s => s.board === 'yes' },
+  { id: 'site', q: 'Where to settle', d: 'In sight of the old settlement, or a few days off.', o: [['near', 'Nearby'], ['far', 'Far']] },
+  { id: 'noise', q: 'How the colony lives (hidden noise)', d: 'Lights, radios, machines. Never shown to the player.', o: [['loud', 'Loud and lit'], ['careful', 'Careful'], ['silent', 'Dark and quiet']] },
+  { id: 'quiet', q: 'Dread 1 · One Too Many', d: 'Rations short, two bunks warm, the radio smashed. Someone is inside the wire.', o: [['hunt', 'Hunt them down'], ['trap', 'Set a trap'], ['ignore', 'Leave it'], ['obey', 'Go dark anyway']] },
+  { id: 'wk', q: 'Dread 2 · The Wake (same months)', d: 'Voices at the wire. People taken in the night. Is it the two?', o: [['fight', 'Fight'], ['fort', 'Fortify'], ['silent', 'Go silent'], ['move', 'Move']] },
+  { id: 'ship', q: 'Dread 3 · The Quiet Ship', d: 'The Ariadne stops answering.', o: [['retake', 'Retake her'], ['seal', 'Seal her'], ['abandon', 'Abandon her'], ['down', 'Bring her down']] },
+  { part: 'Part 3 · The New Generation' },
+  { id: 'fallen', q: 'The Fallen', d: 'A pod from the dark Ariadne. One of your own, burned, starved, decades older.', o: [['take', 'Take them in'], ['hold', 'Hold them apart'], ['refuse', 'Turn them away']] },
+  { id: 'hush', q: 'The Hush', d: 'Outposts go dark. A rider finds a town at its tables, and nobody right.', o: [['radio', 'Radio them in'], ['riders', 'Send riders'], ['pull', 'Pull everyone home']] },
+  { id: 'test', q: 'Who is human?', d: 'They have faces now. Anyone outside at night might be one.', o: [['shoot', 'Shoot on sight'], ['ask', 'Question first'], ['none', 'No test']] },
+  { id: 'side', q: 'Who holds Barrens', d: 'The third ship has landed and wants a Mocker.', o: [['new', 'The newcomers'], ['born', 'Born here'], ['old', 'The old crew']] },
+];
+const Q = B.filter(b => b.id);
+const f = document.getElementById('f'), out = document.getElementById('run');
+
+f.innerHTML = B.map(b => b.part ? `<div class="part">${b.part}</div>` : `<fieldset id="fs-${b.id}"><legend>${b.q}<small>${b.d}</small></legend><div class="opts">${
+  b.o.map(([v, l], i) => `<label><input type="radio" name="${b.id}" id="${b.id}-${v}" value="${v}"${i === 0 ? ' checked' : ''}><span>${l}</span></label>`).join('')}</div></fieldset>`).join('');
+
+const val = () => Object.fromEntries(Q.map(b => [b.id, (f.querySelector(`input[name=${b.id}]:checked`) || {}).value]));
+const N = { loud: 2, careful: 1, silent: 0 };
+
+function play(s) {
+  const L = [], st = {};
+  // Part 1
+  st.clues = { all: 3, ration: 2, stop: 0 }[s.tapes];
+  let strain = { all: 2, ration: 1, stop: 0 }[s.tapes] + (s.told === 'seniors' ? 1 : 0) - (s.wake === 'yes' ? 1 : 0);
+  let wear = s.wake === 'yes' ? 1 : 0;
+  L.push(['Crossing', `${s.told === 'all' ? 'All six hear Earth\'s order and choose to divert together.' : 'The seniors keep the order to themselves, and the rest wake to a mission that\'s been changed under them.'} ${
+    s.tapes === 'all' ? 'They listen to every tape, and by the end they half know what they\'re flying into.' : s.tapes === 'ration' ? 'They ration the tapes, and catch only some of what\'s wrong.' : 'They stop playing the tapes. The crew stay steady and arrive knowing nothing.'}${
+    s.wake === 'yes' ? ' A sleeper is woken early, which costs supplies and keeps one pair sane.' : ''}`, strain >= 3 ? 'bad' : '']);
+  // Part 2 arrival
+  const rider = s.board === 'yes' && (s.salv === 'all' || s.salv === 'parts');
+  const routeA = s.board === 'yes' && s.salv === 'all' ? true : s.board === 'yes' && s.salv === 'parts' ? (s.site === 'near') : false;
+  let supply = (s.board === 'yes' ? { none: 0, parts: 1, all: 2 }[s.salv] : 0) - wear;
+  L.push(['Arrival', `${s.board === 'yes' ? `They board the Persephone: dead crew, a relay torn apart. ${s.salv === 'none' ? 'They take nothing.' : s.salv === 'parts' ? 'They take fuel and parts.' : 'They strip her, shuttle and all.'}` : 'They leave the Persephone tumbling and go straight down.'} The old settlement is empty: tables laid, doors barred from the inside, nobody. ${
+    s.site === 'near' ? 'They settle in sight of it, close to its power and its fields.' : 'They settle a few days off, poorer and quieter.'}`, '']);
+  // Dread 1
+  let n = N[s.noise] + (s.site === 'near' ? 1 : 0);
+  const qEnd = { hunt: 'silenced', trap: 'heard', ignore: n >= 2 ? 'fled' : 'stayed', obey: 'stayed' }[s.quiet];
+  st.quiet = qEnd;
+  if (s.quiet === 'obey') n = Math.max(0, n - 1);
+  const qTxt = {
+    silenced: 'Two of them, in old Persephone jumpsuits worn soft. The colony hunts them down and puts them where they can\'t talk. With them goes the only account of what lives out here, and the colony blames them for the taking.',
+    heard: 'A count at lamp-down catches them: two Persephone survivors raised in the hills. Taken alive and listened to, they say the radio, the lights and the machines wake the Wirrakanya. Nobody believes them yet.',
+    fled: 'Whoever it is gets away, back where they came from. The colony never learns who was eating at its table.',
+    stayed: 'They\'re never found. The colony goes dark and quiet anyway, without knowing why, and the sabotage stops.' }[qEnd];
+  L.push(['One Too Many', `The rations come out short and two bunks are warm. Then the radio is smashed, so nobody can reach the ship until the next lander goes up. ${qTxt}`, qEnd === 'silenced' ? 'bad' : qEnd === 'heard' ? 'good' : '']);
+  // Dread 2, in the same months
+  const know = qEnd === 'heard' ? 1 : 0;
+  let p = n - know + (s.wk === 'fight' ? 1 : 0);
+  const wEnd = s.wk === 'move' ? 'moved' : s.wk === 'silent' ? (p <= 2 ? 'silent' : 'taken') : p >= 3 ? 'taken' : 'held';
+  st.wake = wEnd;
+  const wTxt = {
+    moved: 'They pull up stakes and move, losing a year\'s work, and the voices lose them for a while.',
+    silent: 'The colony learns silence: hand signs, runners, no music. The voices at the wire come less often.',
+    taken: 'The voices learn the watch. People walk out to answer someone they love. It costs them dearly.',
+    held: 'The wire holds. They learn the voices at the wire are the tapes they heard all the way here.' }[wEnd];
+  const why = know ? 'The two told them what it is, and that helps.' : `Only when they go back to the old settlement do they find its log, which ends twenty years early. ${st.clues >= 3 ? 'It confirms what the tapes told them.' : 'Every voice they heard after its last page wasn\'t human.'}`;
+  L.push(['The Wake', `In the same months: voices at the wire, people taken in the night, and the two at the table are the obvious suspects. ${why} ${wTxt}`, wEnd === 'taken' ? 'bad' : wEnd === 'silent' ? 'good' : '']);
+  // Dread 3
+  const route = routeA ? 'A' : 'B';
+  const sEnd = { retake: (route === 'A' && N[s.noise] === 2) ? 'lost' : 'retaken', seal: 'sealed', abandon: 'relay', down: 'down' }[s.ship];
+  st.ariadne = sEnd; st.uplink = ['relay', 'sealed', 'retaken'].includes(sEnd) ? 'on' : 'off';
+  L.push([`The Quiet Ship · Route ${route}`, `${route === 'A' ? 'It came across in the salvage and slept in hold three through all of it, a thermal anomaly logged each month that nobody read. <b>You brought it.</b>' : 'It rode a cargo pod up the loudest line in the sky. <b>It followed you.</b>'} ${
+    { retaken: 'They fight their way back aboard and take her back.', lost: 'They try to retake her, and the boarding party goes quiet one voice at a time.', sealed: 'They seal her from the ground. Her uplink keeps talking to Earth.', relay: 'They abandon her. She hangs dark overhead, still relaying whatever reaches her.', down: 'They bring her down in a long burning line across the plains.' }[sEnd]}`, sEnd === 'lost' ? 'bad' : sEnd === 'retaken' ? 'good' : '']);
+  // Part 3
+  const earthHeard = st.uplink === 'on' ? 'two colonies, both apparently alive, and something in the voices it can\'t explain' : s.report === 'yes' ? 'true warnings and the Mocker on the same channel. It understood one thing: there\'s an animal here that sleeps for years and wakes whole' : 'nothing for decades';
+  L.push(['50 years on', `For fifty years Earth has heard ${earthHeard}. A braking flare becomes a new star, and mid-way through the part a ship lands: guarded, polite, and under orders to bring home a live Mocker.`, '']);
+  const fTxt = { take: 'One of their own, down from the dark ship, taken in. The old crew weep. Nobody asks yet how they lived up there alone: they fed it the others, one cradle at a time, and somewhere in the dark they came to love it. They have come down to wake it.', hold: 'The sleeper is held apart and watched. Nobody\'s sure, and nobody sleeps well.', refuse: 'They are turned away, and walk out to the Quiet with what they know. The same god, loved instead of feared.' }[s.fallen];
+  const hushBad = s.hush === 'radio' && wEnd !== 'silent';
+  const hTxt = { radio: hushBad ? 'They radio the outposts in. Every outpost that answers goes dark the week after.' : 'They radio the outposts, briefly, in the colony\'s learnt code. Most come home.', riders: 'Riders go out along the road. Some come back.', pull: 'Everyone is pulled home behind the wire. The land is left to the newcomers.' }[s.hush];
+  const tTxt = { shoot: 'They shoot anything that looks wrong at night. The Quiet’s people, maimed and born wrong, look wrong. The colony’s fear of the monster becomes a massacre of the people who knew about it first.', ask: 'They question first, and it already knows the answers. Some of the questioners don’t come back.', none: 'No test. They live beside whatever is among them, and count heads every morning.' }[s.test];
+  L.push(['The Fallen and the Hush', `${fTxt} ${hTxt}${s.hush === 'pull' ? ' The newcomers take the empty stations.' : ''} The towns that went dark weren't raided. Something lived in them for a season, learned everyone, and then tore them apart in a night.`, hushBad ? 'bad' : '']);
+  L.push(['Who is human', tTxt, s.test === 'shoot' ? 'bad' : '']);
+  // Ending
+  const native = (s.report === 'no' ? 1 : 0) + (qEnd === 'heard' ? 1 : 0) + (wEnd === 'silent' ? 1 : 0) + (s.side === 'born' ? 1 : 0) - (s.test === 'shoot' ? 1 : 0);
+  let endKey;
+  if (s.side === 'new') endKey = 'home';
+  else if (s.side === 'old') endKey = s.fallen === 'take' ? 'played' : 'answered';
+  else endKey = native >= 2 ? 'kept' : 'played';
+  const E = {
+    home: ['The newcomers hold Barrens', 'Earth\'s charter is restored. The Quiet work their fields in chains, and the labs are full. A Mocker sleeps in the ship’s hold, bound for Earth. It looks like a win. It\'s the false spring, carried home.', 'bad'],
+    answered: ['The old crew answer Earth', 'The old crew make terms with the newcomers: the colony is kept, and Earth gets the science but not the animal. A hard, grey peace.', ''],
+    kept: ['Born here: the silence kept', 'The children of Barrens hold it. The ship is sent away empty or taken apart for parts, and the radios stay off.', 'good'],
+    played: ['Nobody holds Barrens', 'Every side is fighting the others in each other\'s voices. The Mocker is playing all three.', 'bad'] }[endKey];
+  st.EarthNative = native >= 2 ? 'Native' : 'Earth';
+  return { L, E, st: { ...st, route, rider: rider ? 'yes' : 'no', noise: s.noise, strain, supply } };
+}
+
+function draw() {
+  const s = val();
+  Q.forEach(b => { if (!b.need) return; const on = b.need(s); f.querySelectorAll(`input[name=${b.id}]`).forEach(i => i.disabled = !on); document.getElementById('fs-' + b.id).style.opacity = on ? 1 : .5; });
+  const r = play(s);
+  out.innerHTML = r.L.map(([h, t, tone]) => `<h3>${h}${tone ? ` <span class="tag ${tone}">${tone === 'bad' ? 'goes badly' : 'goes well'}</span>` : ''}</h3><p>${t}</p>`).join('') +
+    `<div class="end">${r.E[0]}</div><p>${r.E[1]}</p>` +
+    `<div class="states">Carried: route ${r.st.route} · the two <b>${r.st.quiet}</b> · Wake <b>${r.st.wake}</b> · Ariadne <b>${r.st.ariadne}</b> · uplink ${r.st.uplink} · noise ${r.st.noise} · clues ${r.st.clues} · leans <b>${r.st.EarthNative}</b></div>`;
+}
+const total = Q.reduce((n, b) => n * b.o.length, 1);
+document.getElementById('count').textContent = `${total.toLocaleString()} combinations of choices. The carried states fold them into a few dozen distinct runs.`;
+f.addEventListener('change', draw);
+document.getElementById('rand').onclick = () => { Q.forEach(b => { const v = b.o[Math.floor(Math.random() * b.o.length)][0]; f.querySelector(`#${b.id}-${v}`).checked = true; }); draw(); };
+document.getElementById('reset').onclick = () => { Q.forEach(b => f.querySelector(`#${b.id}-${b.o[0][0]}`).checked = true); draw(); };
+draw();
+</script>
