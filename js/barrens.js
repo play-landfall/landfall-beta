@@ -64,6 +64,18 @@ for (const id in DEFS) { const d = DEFS[id];
   if (d.dread && !LF.BARRENS_DREADS.includes(id)) d.fits = () => 0;   // out of the run, and out of the storm
   if (LF.BARRENS_DREADS.includes(id)) d.fits = () => 1; }
 
+/* Only Barrens' own story is dealt (second pass, 2026-11-27): the old game's threads (the Charter, the Body, the Verge, the
+   Eaters and the rest) were still being dealt here, and though their cards never came, their phases leaked into the recap
+   and the epilogue ("the colony found a line in the ground to the east"). Every thread that is not Barrens' own is out of
+   the plot and out of the storm. */
+LF.BARRENS_OWN = LF.BARRENS_DREADS.concat([QS, 'third', 'mimic', 'fallen']);
+for (const id in DEFS) if (!LF.BARRENS_OWN.includes(id)) { DEFS[id].fits = () => 0; DEFS[id].always = false; }
+
+// a party that came back changed opens the old game's Verge (js/thread-small.js): not on Barrens
+{ const away0 = LF.awayReturn; LF.awayReturn = function (s, a, forced) { const had = !!(s.threads && s.threads.zone), r = away0(s, a, forced);
+  if (!had && s.threads && s.threads.zone) { delete s.threads.zone; if (s.plot) for (const k of ['threads', 'counters']) if (s.plot[k]) s.plot[k] = s.plot[k].filter(x => x !== 'zone'); }
+  return r; }; }
+
 const plot0 = LF.plot;
 LF.plot = function (s) {
   plot0(s);
@@ -92,6 +104,27 @@ LF.qsTick = function (s, force) {
     const p = (H && seats.map(k => H(s, k)).find(Boolean)) || s.people.find(x => x.alive && !x.left && !x.orbit && !x.away && x.name);
     if (p) { q.dbl = p.id; q.dblName = p.name; } }
 };
+
+// Whoever is still aboard when she goes dark is lost with her (second pass, 2026-11-27). The officers left aboard at the first
+// flight come down on the lander's runs (js/barrens-deck.js), so this is a colony that stopped flying, or flew too little.
+// Their names are kept on the thread for the years between (q.lost).
+const sil1 = LF.qsSilent;
+if (sil1) LF.qsSilent = function (s, t) { sil1(s, t);
+  if (t && !t.lost) { t.lost = [];
+    for (const p of LF.inOrbit(s)) { t.lost.push(p.name); LF.killPerson(s, p, `lost aboard the ${s.world.ship} when she went dark`); } } };
+// the ship's own cryo report is a voice from a ship that is still the colony's
+{ const rep = LF.reports && LF.reports.find(r => r.id === 't.sleepers');
+  if (rep) { const w0 = rep.when; rep.when = s => w0(s) && !(s.threads && s.threads[QS]); } }
+// The Quiet Ship's first warning shares a name with One Too Many on Barrens
+if (LF.byId['qs.count']) LF.byId['qs.count'].title = 'One More Heartbeat';
+// Where the lander comes down: the site, in Barrens' own words, not the generic world's landing grounds
+{ const td0 = LF.touchdown; LF.touchdown = function (s) { const r = td0(s), far = !!s.world.site;
+  r.name = far ? 'the creek flat out on the plains' : 'the flat below the old settlement';
+  r.text = far ? 'Red ground to every horizon, a creek line of lone trees, and nothing made by anybody. The engines tick as they cool, and that is the only sound.'
+    : 'Dust, and the wind off the plain, and half a kilometre up the rise the Persephone colony\'s domes standing in a row with their doors shut. Nobody comes down the track to meet the lander.';
+  r.fx = Object.assign({}, r.fx, { chron: `First camp was made at ${r.name}.` });
+  const act0 = r.act; r.act = s2 => { act0(s2); s2.world.zone = r.name; };
+  return r; }; }
 
 // Not Mine is a next-generation dread for another planet's story: Barrens' Part 3 (stage 6) has its own. Held out until then.
 if (LF.nmTick) LF.nmTick = () => {};

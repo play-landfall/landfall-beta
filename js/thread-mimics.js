@@ -17,7 +17,8 @@ if (!LF.BARRENS) return;
 const ID = 'mimic', T = s => LF.T(s, ID), MONTH = LF.MONTH, YEAR = LF.YEAR;
 const para = (...a) => a.filter(Boolean).join('\n\n');
 const since = (s, id) => s.used[id] === undefined ? -1 : s.day - s.used[id];
-const OPEN = [14, 26], GAP = 6, FRENZY = 0.06;
+const OPEN = [5, 11], GAP = 6,   // OPEN was 14-26 months (second pass, 2026-11-27)
+      FRENZY = 0.06;
 const P = (s, seat) => LF.officer(s, seat);
 const say = (s, seat, L, expr) => { const p = P(s, seat); if (!p || !p.key || (LF.seatState && LF.seatState(s, seat) !== 'here') || !L[p.key]) return ''; return `[[${p.key}${expr ? '|' + expr : ''}]] "${L[p.key]}"`; };
 const towns = s => LF.settled(s).slice().sort((a, b) => LF.stlDist(s, b.slot) - LF.stlDist(s, a.slot));   // farthest first

@@ -67,11 +67,18 @@ B('pod', { id: 'fal.pod', view: 'world', tone: 'crisis', w: 9, title: 'Out of th
 /* ===== what Ines did ===== */
 const DID = { hid: `In the first year aboard, ${FIRST} read the ship's log about hold three running warm, and hid it. A thing like that would be worth more on Earth than everyone in the banks.`,
   opened: `${FIRST} opened the hold the lander had come up in, because something inside it was knocking with a human hand, and calling ${FIRST} by name.` };
+/* What Ines did after, by how the Quiet Ship ended (s.flags.b_ship; second pass, 2026-11-27): vented and killed, the boarding
+   party never knew Ines was aboard, and the feeding went on without it. */
+const FED = {
+  left: `When it woke, ${FIRST} lived by feeding it the others: a cradle at a time, pulled out of the banks and wheeled down to the hold, so it would leave ${FIRST} alone.`,
+  folded: `When it woke, ${FIRST} lived by feeding it the others, a cradle at a time, so it would leave ${FIRST} alone. When the boarding party came, ${FIRST} hid in the cable runs and watched them put it out of the lock. Every month since, ${FIRST} has pushed another cradle out of the lock after it, so it would have them when it woke.`,
+  killed: `When it woke, ${FIRST} lived by feeding it the others, a cradle at a time, so it would leave ${FIRST} alone. When the boarding party killed it, ${FIRST} hid in the cable runs, and heard it go on talking in the walls for a year after. ${FIRST} went on wheeling the cradles to the vents.`,
+};
 B('talk', { id: 'fal.talk', view: 'people', tone: 'crisis', w: 9, title: 'Every Empty Cradle', scene: ['fal_talk', 'sleep_cryo'],
-  setup: s => ({ is: T(s).truth.is }),
-  text: (s, c) => para(DID[c.is], `When it woke, ${FIRST} lived by feeding it the others: a cradle at a time, pulled out of the banks and wheeled down to the hold, so it would leave ${FIRST} alone.`,
+  setup: s => ({ is: T(s).truth.is, sh: s.flags.b_ship }),
+  text: (s, c) => para(DID[c.is], FED[c.sh] || FED.left,
     `[[unknown:${NAME}]] "Every empty cradle up there is mine. I'm not sorry. It needed them, and after that it was so kind to me."`,
-    `${FIRST} knows where it sleeps. ${FIRST} wants to take the colony to it, and wake it, and love it.`),
+    `${FIRST} says the one up there was only ever a child of it, and knows where the rest of it sleeps, down here. ${FIRST} wants to take the colony to it, and wake it, and love it.`),
   choices: [
     { label: 'Ask where it sleeps, and write all of it down', note: `Every word, however mad, because ${FIRST} is the only one who has lived beside it.`, info: [['yield', 'Where it sleeps'], ['later', `${FIRST}, still talking`]],
       out: { text: `It takes three nights. ${FIRST} draws it on the clinic wall in charcoal: the gullies, the shellrock, a hollow under the third ridge where the ground is warm in the dry season. ${FIRST} cries when they are done, from happiness.`, fx: s => ({ flags: { b_where: s.day } }) } },

@@ -26,7 +26,8 @@ const earth = (s, n) => { s.flags.b_earth = (s.flags.b_earth || 0) + n; };
 const since = (s, id) => s.used[id] === undefined ? -1 : s.day - s.used[id];
 const quietKnown = s => !!(s.flags.b_quiet_found || s.flags.b_quiet_known || s.flags.b_extra === 'heard');
 const finish = (s, end, chron) => { s.flags.b_third = end; LF.endThread(s, ID, end, chron); };
-const FLARE_AFTER = [3, 8], VOICE_AFTER = 10, LAND_AFTER = 12, PAPERS_AFTER = 3, WANT_AFTER = 5, DOME_AFTER = 4, CAMP_NOISE = 20;
+const FLARE_AFTER = [1, 3], VOICE_AFTER = 4, LAND_AFTER = 8,   // were 3-8, 10 and 12 months: Part 3 opened on most of a year of recaps (second pass, 2026-11-27)
+      PAPERS_AFTER = 3, WANT_AFTER = 5, DOME_AFTER = 4, CAMP_NOISE = 20;
 
 LF.thread({ id: ID, name: 'The Third Ship', view: 'world', own: true,
   fits: () => 0,
@@ -77,11 +78,11 @@ const HELLO = {
 B('voice', { id: 'tsh.voice', view: 'colony', tone: 'crisis', w: 8, title: 'The Provident', scene: ['tsh_voice', 'built_comms'],
   setup: s => ({ is: T(s).truth.is, J: (s.flags.b_jump && s.flags.b_jump.years) || 14 }),
   text: (s, c) => para(HELLO[c.is](s, c.J),
-    say(s, 'command', { solheim: 'They\'re a year out and they\'ve already told us what they think we are, which is theirs. I want the pad cleared and the stores counted before they\'re close enough to ask for either.',
+    say(s, 'command', { solheim: 'They\'re eight months out and they\'ve already told us what they think we are, which is theirs. I want the pad cleared and the stores counted before they\'re close enough to ask for either.',
       achebe: 'All right, before anybody answers them, I want the council in one room. Folks hear about this from us tonight, not off the radio.' }, 'grim')),
   choices: [
     { label: 'Give them the landing ground by the pad', note: 'They come down where the colony can see them.', info: [['yield', 'A welcome'], ['later', 'What they do with it']],
-      out: { text: 'The landing ground is marked out on the flats beside the pad, with lamps at the corners. The Provident says thank you, and says it will be a year.', fx: s => ({ do: s2 => { T(s2).did.welcome = 1; earth(s2, 1); } }) } },
+      out: { text: 'The landing ground is marked out on the flats beside the pad, with lamps at the corners. The Provident says thank you, and says it will be eight months.', fx: s => ({ do: s2 => { T(s2).did.welcome = 1; earth(s2, 1); } }) } },
     { label: 'Tell them what is out there, all of it', note: 'The voices, the taking, the thing in the dark. They should know what they are landing on.', info: [['yield', 'They are warned'], ['later', 'What they make of it']],
       out: { text: 'It takes the whole of one pass to tell it, and the operator\'s voice goes at the end. The reply comes back within the hour, quick and polite.\n\n[[unknown:The Provident]] "Understood, and thank you. Please preserve any specimens."\n\nNobody in the radio room says anything for a while.', fx: s => ({ do: s2 => { T(s2).did.warned = 1; } }) } },
     { label: 'Tell them to stay in orbit', note: 'Whatever they have come for, they can ask for it from up there.', info: [['yield', 'Distance, for now'], ['danger', 'Their temper']],

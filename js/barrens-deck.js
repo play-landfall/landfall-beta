@@ -39,6 +39,13 @@ const AUTO_BUILD = true;
   if (AUTO_BUILD && s.world && !LF.aloft(s) && s.day % MONTH === 0 && !s.project && !(s.bq && s.bq.length) && LF.yardList && LF.yardStart) {
     const id = LF.yardList(s).find(k => !LF.yardWhy(s, k, 'build')); if (id) LF.yardStart(s, id, 'order'); }
   return r; }; }
+// The officers left aboard at the first flight come down one a run, in seat order, as the first-flight card promises (second
+// pass, 2026-11-27: with the seat question off they never came down at all, and were still aboard twenty years on). Not
+// while she is dark: a flight to a dark ship is the Quiet Ship's own.
+{ const run0 = LF.flyRun; LF.flyRun = function (s, chips) { const n = run0(s, chips);
+  if (!s.flags.qs_dark) { const p = LF.SEAT_ORDER.map(k => LF.inOrbit(s).find(x => x.seat === k)).find(Boolean);
+    if (p) { LF.bringDown(s, p); if (chips) chips.push({ t: `${p.first} down from the ship`, good: true }); } }
+  return n; }; }
 // everyone and everything aboard comes down on the lander's first runs
 { const land0 = LF.land; LF.land = function (s) { const r = land0(s);
   for (const p of s.people) if (p.alive && p.orbit && p.seat && LF.bringDown) LF.bringDown(s, p);
