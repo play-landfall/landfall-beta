@@ -36,9 +36,9 @@ LF.BARRENS_SITES = [
     seen: 'Long lens, at dawn, from three hundred kilometres. A low rise above a dry creek bed, and on it the Persephone colony: twelve domes, a landing pad, a radio mast and field strips gone pale. Nothing moves there. Nothing is warm at night.',
     rows: [['Walk to the old settlement', 'Half a kilometre'], ['Ground', 'Broken, and farmed once'], ['Salvage', 'Domes, stores, power'], ['Water', 'The old colony\'s wells']] },
   { key: 'far', label: 'The open plains, days off', pic: 'site_far', crop: '72% 28%', zoom: 1.9,
-    gives: 'Clean ground, grass along the creek, and water in its pools.', costs: 'Little to salvage, poor soil away from the creek, and a long way from anything.',
-    seen: 'A wide plain three days north-east, between two worn ranges: red ground over pale sand, and down the middle a creek line of lone trees with green flats of wiregrass along it and pools that still hold water. Outcrops of shellrock that cut like soft stone. Nothing made by people within a hundred kilometres.',
-    rows: [['Walk to the old settlement', 'Three days'], ['Ground', 'Unbroken, and poor'], ['Salvage', 'None'], ['Water', 'A creek that runs in the Wet']] },
+    gives: 'Clean ground, and a spring that runs all year.', costs: 'Little to salvage, poor soil, and a long way from anything.',
+    seen: 'A wide plain three days north-east, between two worn ranges: red ground over pale sand, and near the middle a lone rock dome with a dark spot at its foot that the survey reads as standing water. Outcrops of shellrock that cut like soft stone. Nothing made by people within a hundred kilometres.',
+    rows: [['Walk to the old settlement', 'Three days'], ['Ground', 'Unbroken, and poor'], ['Salvage', 'None'], ['Water', 'A spring under the rock dome']] },
 ];
 LF.ARCHETYPES.barren.kinds = { fauna: 1.6, flora: 1, plague: 0.8 };
 LF.ARCHETYPES.barren.subs = { fauna: ['pack', 'giant', 'delver'], flora: ['mat', 'choir'], plague: ['wasting', 'fever', 'rot'] };
@@ -119,8 +119,8 @@ if (sil1) LF.qsSilent = function (s, t) { sil1(s, t);
 if (LF.byId['qs.count']) LF.byId['qs.count'].title = 'One More Heartbeat';
 // Where the lander comes down: the site, in Barrens' own words, not the generic world's landing grounds
 { const td0 = LF.touchdown; LF.touchdown = function (s) { const r = td0(s), far = !!s.world.site;
-  r.name = far ? 'the creek flat out on the plains' : 'the flat below the old settlement';
-  r.text = far ? 'Red ground to every horizon, a creek line of lone trees, and nothing made by anybody. The engines tick as they cool, and that is the only sound.'
+  r.name = far ? 'the flat below the rock dome, out on the plains' : 'the flat below the old settlement';
+  r.text = far ? 'Red ground to every horizon, a lone rock dome with dark water at its foot, and nothing made by anybody. The engines tick as they cool, and that is the only sound.'
     : 'Dust, and the wind off the plain, and half a kilometre up the rise the Persephone colony\'s domes standing in a row with their doors shut. Nobody comes down the track to meet the lander.';
   r.fx = Object.assign({}, r.fx, { chron: `First camp was made at ${r.name}.` });
   const act0 = r.act; r.act = s2 => { act0(s2); s2.world.zone = r.name; };
@@ -173,7 +173,7 @@ if (LF.BARRENS) { const cost0 = LF.cost, BARRENS_BUILD = 0.125;
 /* ---------- what orbit says of the site once it is chosen (setup.site's outcome) ---------- */
 if (LF.BARRENS) LF.siteReport = function (s) {
   return s.world.site
-    ? 'The last orbits over the plain: spent red soil over sand, shellrock in the outcrops, and a creek line that will run in the Wet and not before. Nothing moves out there in daylight.\n\nThe lander will set down on the flat beside the creek line.'
+    ? 'The last orbits over the plain: spent red soil over sand, shellrock in the outcrops, and at the foot of a lone rock dome a spring that reads wet on every pass, Wet or dry. Nothing moves out there in daylight.\n\nThe lander will set down on the flat below the rock dome.'
     : 'The last orbits over the old settlement: the Persephone colony\'s domes are standing, and none of them shows any heat. The fields are pale with wiregrass. The wells read dry at the top and wet further down.\n\nThe lander will set down on flat ground below the rise, half a kilometre from the nearest dome.';
 };
 
