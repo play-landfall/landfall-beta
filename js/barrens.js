@@ -36,8 +36,8 @@ LF.BARRENS_SITES = [
     seen: 'Long lens, at dawn, from three hundred kilometres. A low rise above a dry creek bed, and on it the Persephone colony: twelve domes, a landing pad, a radio mast and field strips gone pale. Nothing moves there. Nothing is warm at night.',
     rows: [['Walk to the old settlement', 'Half a kilometre'], ['Ground', 'Broken, and farmed once'], ['Salvage', 'Domes, stores, power'], ['Water', 'The old colony\'s wells']] },
   { key: 'far', label: 'The open plains, days off', pic: 'site_far', crop: '72% 28%', zoom: 1.9,
-    gives: 'Clean ground and nobody\'s old fields.', costs: 'Little to salvage, poor soil, and a long way from anything.',
-    seen: 'A wide plain three days north-east, between two worn ranges: red ground over pale sand, a creek line of lone trees, and outcrops of shellrock that cut like soft stone. Nothing made by people within a hundred kilometres.',
+    gives: 'Clean ground, grass along the creek, and water in its pools.', costs: 'Little to salvage, poor soil away from the creek, and a long way from anything.',
+    seen: 'A wide plain three days north-east, between two worn ranges: red ground over pale sand, and down the middle a creek line of lone trees with green flats of wiregrass along it and pools that still hold water. Outcrops of shellrock that cut like soft stone. Nothing made by people within a hundred kilometres.',
     rows: [['Walk to the old settlement', 'Three days'], ['Ground', 'Unbroken, and poor'], ['Salvage', 'None'], ['Water', 'A creek that runs in the Wet']] },
 ];
 LF.ARCHETYPES.barren.kinds = { fauna: 1.6, flora: 1, plague: 0.8 };
