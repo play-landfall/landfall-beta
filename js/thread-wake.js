@@ -116,7 +116,7 @@ B('shape', { id: 'wak.shape', tone: 'crisis', w: 7, timer: 10, title: 'At the En
       zulu: 'That isn\'t one of mine. I need someone to tell me what to do, please, and I need it now.' }, 'afraid')),
   choices: [
     { label: 'Fire',
-      out: { text: 'The rifle goes off. The thing drops onto four legs, all at once, and goes away through the beans faster than anything that size should move. At first light there is a smear on the leaves that is not red, and a trail that goes straight to the creek.', fx: s => ({ do: s2 => { const t = T(s2); t.did.shot = true; t.step = 3; } }) } },
+      out: { text: 'The rifle goes off. The thing drops onto all six legs at once, and goes away through the beans faster than anything that size should move. At first light there is a smear on the leaves that is not red, and a trail that goes straight to the creek.', fx: s => ({ do: s2 => { const t = T(s2); t.did.shot = true; t.step = 3; } }) } },
     { label: 'Call out to it',
       out: { text: s => `${Nm(s, 'security')} calls out, and it answers in ${Nm(s, 'security')}\'s own voice, saying the same words back, the same way. Then it turns and walks away down the row, upright, unhurried. One of the watch walks after it before anyone can stop them, and does not come back.`, fx: s => ({ pop: -1, morale: -2, do: s2 => { const t = T(s2); t.taken++; t.toll++; t.step = 3; } }) } },
     { label: 'Nobody moves', late: true,
