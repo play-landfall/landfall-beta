@@ -19,7 +19,8 @@
 if (!LF.BARRENS) return;
 const YEAR = LF.YEAR, MONTH = LF.MONTH, clamp = LF.clamp;
 const TO_YEAR = 20, MIN_JUMP = 12, BETWEEN = [20, 45], LATEST = 8 * YEAR;   // BETWEEN was 60-150 days: nine months to a year of nothing after the ship (second pass, 2026-11-27)
-const ADULT_DIES = 0.012, KID_DIES = 0.02, BIRTH_GROWTH = 0, OFFICER_DIES = 0.3, OFFICER_MOST = 3, SETTLE = 3;
+const ADULT_DIES = 0.012, KID_DIES = 0.02, BIRTH_GROWTH = 0, OFFICER_DIES = 0.15, OFFICER_MOST = 2,   // were 0.3 and 3: the officers die on the cards now (js/barrens-crew.js)
+      SETTLE = 3;
 const OUT = ['extra', 'wake', 'quiet'];
 
 // Part 3 brings its own: until it is built, nothing of the late game's own runs on Barrens
