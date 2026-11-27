@@ -1,5 +1,5 @@
 /* Landfall — the Ariadne's schematic, for the Ship view (Lachlan, 2026-11-16: the ship card should show what is
-   still on board and what is damaged). A side elevation drawn as a blueprint, fore to aft: the bridge, the crew deck
+   still on board and what is damaged). Since 2026-11-27 drawn on her own pixel plan (below, LF.shipPlan). It was a side elevation drawn as a blueprint, fore to aft: the bridge, the crew deck
    with whoever is awake aboard, cryo banks B to D with a cell per pod (lit, amber or dark), the hold with a cradle per
    system (its condition, or empty once it is down), the lander dock, and the drive with the empty reactor bay. Damage
    comes from what has happened (a tumble, a jettisoned bank, failing pods, a dry tank) and from anything a thread
@@ -33,48 +33,51 @@ LF.shipDamage = function (s) {
   const worn = LF.aboard(s).filter(id => s.machines[id].hp < 30); if (worn.length) out.push(`${worn.length === 1 ? LF.MACHINES[worn[0]].name : worn.length + ' systems'} failing in the cradles`);
   return out;
 };
+/* The Ariadne as she is built (2026-11-27, docs/ariadne-plan.md): the same pixel plan the walk aboard is drawn on
+   (art/walk/plan.webp), with what is aboard marked on her own rooms, at the walk's positions (LF.WALK_ROOMS). A thread's mark
+   (dark, sealed, unknown, growth, breach) is drawn on the rooms of its section. */
+const AT = { bridge: ['bridge'], crew: ['crew', 'galley', 'infirm'], banks: ['bankB', 'bankC', 'bankD'], hold: ['hold'], dock: ['collar'], drive: ['drive'] };
 LF.shipPlan = function (s) {
-  const W = 360, H = 150, y0 = 44, hh = 62, mk = LF.shipMarks(s), f = s.flags || {}, up = LF.inOrbit(s), L = s.machines.lander;
-  const parts = [];
-  const sec = (x, w, label, key) => { const m = mk[key];
-    parts.push(`<rect x="${x}" y="${y0}" width="${w}" height="${hh}" rx="4" ${str(m === 'breach' ? 'bad' : 'dim', m === 'breach' ? 1.4 : 0.8)}${m === 'breach' ? ' stroke-dasharray="4 2"' : ''}/>`);
-    parts.push(`<text x="${x + w / 2}" y="${y0 - 6}" text-anchor="middle" font-size="7.5" letter-spacing=".08em" ${col('dim')}>${label}</text>`);
-    if (m === 'dark' || m === 'unknown' || m === 'sealed') parts.push(`<rect x="${x + 1}" y="${y0 + 1}" width="${w - 2}" height="${hh - 2}" rx="3" style="fill:var(--bg);opacity:.78"/><text x="${x + w / 2}" y="${y0 + hh / 2 + 3}" text-anchor="middle" font-size="7" letter-spacing=".1em" ${col(m === 'sealed' ? 'rust' : 'bad')}>${m === 'dark' ? (w < 44 ? 'DARK' : 'NO SIGNAL') : m === 'sealed' ? (w < 44 ? 'SEAL' : 'SEALED') : '?'}</text>`);
-    if (m === 'growth') parts.push(`<path d="M${x + 4} ${y0 + hh - 3} q ${w / 4} -${hh / 2} ${w / 2} -6 t ${w / 2 - 8} -${hh / 3}" ${str('bad', 1.2)}/><path d="M${x + 8} ${y0 + 4} q ${w / 3} ${hh / 3} ${w - 16} ${hh / 4}" ${str('bad', 0.9)}/>`); };
-  // the hull: a long spine with a blunt bow to the left
-  parts.push(`<path d="M18 ${y0 + hh / 2} L34 ${y0 - 4} L${W - 40} ${y0 - 4} L${W - 18} ${y0 + 6} L${W - 18} ${y0 + hh - 6} L${W - 40} ${y0 + hh + 4} L34 ${y0 + hh + 4} Z" ${str('line', 1.2)}/>`);
-  // bridge
-  sec(36, 34, 'BRIDGE', 'bridge');
-  if (mk.bridge !== 'dark' && mk.bridge !== 'unknown') parts.push(`<circle cx="53" cy="${y0 + hh / 2}" r="4" ${col(up.length ? 'good' : 'dim')}/>`);
-  // crew deck: one dot per officer awake aboard, initials under it
-  sec(74, 38, 'CREW', 'crew');
-  if (mk.crew !== 'dark' && mk.crew !== 'unknown') up.slice(0, 3).forEach((p, i) => { const cx = 84 + i * 9;
-    parts.push(`<circle cx="${cx}" cy="${y0 + 22}" r="3.2" ${col(p.stranded ? 'bad' : 'ink')}/><text x="${cx}" y="${y0 + 36}" text-anchor="middle" font-size="6" ${col('dim')}>${esc(p.first[0] + p.last[0])}</text>`); });
-  // the banks: a cell per pod, filled in order B, C, D
-  const cap = Math.max(150, s.sleepers + (s.flags.woken || 0) * 20), per = Math.ceil(cap / 3), lit = s.sleepers;
-  let left = lit;
-  BANKS.forEach((b, j) => { const x = 116 + j * 46, gone = b === 'D' && f.lim_jettisoned;
-    if (gone) { parts.push(`<rect x="${x}" y="${y0}" width="42" height="${hh}" rx="4" ${str('bad', 0.8)} stroke-dasharray="2 3"/><text x="${x + 21}" y="${y0 - 6}" text-anchor="middle" font-size="7.5" ${col('bad')}>BANK D</text><text x="${x + 21}" y="${y0 + hh / 2 + 3}" text-anchor="middle" font-size="6.5" ${col('bad')}>GONE</text>`); return; }
-    sec(x, 42, 'BANK ' + b, 'banks');
-    if (mk.banks === 'dark' || mk.banks === 'unknown' || mk.banks === 'sealed') return;
-    const n = Math.min(per, left); left -= n; const cells = 48, on = Math.round(cells * n / per), amber = b === 'B' && s.memo && !s.memo['ship.pods'] && s.day >= 240 && s.sleepers >= 30 ? 4 : 0;
-    for (let k = 0; k < cells; k++) { const cx = x + 4 + (k % 6) * 6.2, cy = y0 + 5 + Math.floor(k / 6) * 7;
-      parts.push(`<rect x="${cx.toFixed(1)}" y="${cy}" width="4.4" height="5" rx="1" ${col(k < on ? (k >= on - amber ? 'rust' : 'good') : 'line')}/>`); } });
-  // the hold: a cradle per system, filled while it is still aboard
-  sec(256, 52, 'HOLD', 'hold');
-  if (mk.hold !== 'dark' && mk.hold !== 'unknown' && mk.hold !== 'sealed') SYS.forEach((id, i) => { const m = s.machines[id], x = 260 + (i % 2) * 23, y = y0 + 6 + Math.floor(i / 2) * 28, here = m && m.up && !m.lost;
-    parts.push(`<rect x="${x}" y="${y}" width="21" height="24" rx="2" ${here ? col(m.hp < 30 ? 'bad' : m.hp < 55 ? 'rust' : 'raise') : str('line', 0.8)}/>`);
-    parts.push(`<text x="${x + 10.5}" y="${y + 15}" text-anchor="middle" font-size="4.6" ${col(here ? 'ink' : 'dim')}>${here ? SHORT[id] : m && m.lost ? 'LOST' : 'DOWN'}</text>`); });
-  // dock and drive
-  sec(312, 28, 'DOCK', 'dock');
-  parts.push(L.lost ? `<text x="326" y="${y0 + hh / 2 + 3}" text-anchor="middle" font-size="6" ${col('bad')}>NONE</text>`
-    : `<path d="M318 ${y0 + 40} l8 -20 l8 20 z" ${s.flags.qs_lander_up ? col('ink') : str('dim', 0.8)}/><text x="326" y="${y0 + 54}" text-anchor="middle" font-size="5.5" ${col('dim')}>${s.flags.qs_lander_up ? 'DOCKED' : 'BELOW'}</text>`);
-  parts.push(`<path d="M${W - 18} ${y0 + 14} l12 -6 l0 ${hh - 16} l-12 -6" ${str('dim', 0.8)}/>`);
-  // fuel and orbit along the bottom
+  const R = LF.WALK_ROOMS, mk = LF.shipMarks(s), f = s.flags || {}, up = LF.inOrbit(s), L = s.machines.lander, parts = [];
+  const lbl = (x, y, t, c, size) => parts.push(`<text x="${x}" y="${y}" text-anchor="middle" font-size="${(size || 6.5) * 1.3}" font-weight="800" class="sp-l" ${col(c || 'ink')}>${esc(t)}</text>`);
+  const hidden = key => ['dark', 'unknown', 'sealed'].includes(mk[key]);
+  // the plan, then the marks of each section
+  parts.push(`<image href="art/walk/plan.webp" x="0" y="0" width="320" height="213" class="sp-plan"/>`);
+  for (const key in AT) { const m = mk[key]; if (!m) continue;
+    for (const r of AT[key]) { const p = R[r];
+      if (m === 'growth') parts.push(`<path d="M${p.x - 12} ${p.y + 6} q 6 -14 12 -4 t 12 -6" ${str('bad', 1.6)}/><path d="M${p.x - 10} ${p.y - 6} q 8 8 20 2" ${str('bad', 1.2)}/>`);
+      else if (m === 'breach') parts.push(`<circle cx="${p.x}" cy="${p.y}" r="11" ${str('bad', 1.4)} stroke-dasharray="3 2"/>`);
+      else parts.push(`<circle cx="${p.x}" cy="${p.y}" r="10" style="fill:var(--bg);opacity:.8"/>`); }
+    if (['dark', 'unknown', 'sealed'].includes(m)) { const p = R[AT[key][0]]; lbl(p.x, p.y - 13, m.toUpperCase(), m === 'sealed' ? 'rust' : 'bad', 6); } }
+  // the bridge: lit while anyone is aboard to keep her
+  if (!hidden('bridge')) parts.push(`<circle cx="${R.bridge.x}" cy="${R.bridge.y}" r="3.5" ${col(up.length ? 'good' : 'dim')}/>`);
+  // the crew deck: the officers aboard, by initials, round the fore ring
+  if (!hidden('crew')) up.slice(0, 4).forEach((p, i) => { const x = R.crew.x - 18 + i * 12, y = R.crew.y - 16;
+    parts.push(`<circle cx="${x}" cy="${y}" r="5" ${col(p.stranded ? 'bad' : 'raise')}/>`); lbl(x, y + 2.3, p.first[0] + p.last[0], 'ink', 5.5); });
+  // the banks: a cell per twelfth of the bank, lit while it holds sleepers (B, C, then D)
+  const cap = Math.max(150, s.sleepers + (s.flags.woken || 0) * 20), per = Math.ceil(cap / 3); let left = s.sleepers;
+  BANKS.forEach(b => { const r = R['bank' + b], gone = b === 'D' && f.lim_jettisoned;
+    if (gone) { lbl(r.x, r.y + 2, 'GONE', 'bad', 6); return; }
+    if (hidden('banks')) return;
+    const n = Math.min(per, left); left -= n; const cells = 12, on = Math.round(cells * n / per), amber = b === 'B' && s.memo && !s.memo['ship.pods'] && s.day >= 240 && s.sleepers >= 30 ? 2 : 0;
+    const below = b === 'C', y0 = below ? r.y + 15 : r.y - 25;   // just clear of the painted pods: B and D above the spine, C below
+    parts.push(`<rect x="${r.x - 12}" y="${y0 - 2}" width="24" height="12" rx="2" style="fill:var(--card);opacity:.85"/>`);
+    for (let k = 0; k < cells; k++) { const x = r.x - 10 + (k % 6) * 3.4, y = y0 + Math.floor(k / 6) * 4;
+      parts.push(`<rect x="${x.toFixed(1)}" y="${y}" width="2.6" height="3" ${col(k < on ? (k >= on - amber ? 'rust' : 'good') : 'line')}/>`); }
+    lbl(r.x - 17, y0 + 6, b, 'dim', 5.5); });
+  // the hold: a cradle per system, full while it is still aboard
+  if (!hidden('hold')) SYS.forEach((id, i) => { const m = s.machines[id], x = R.hold.x - 18 + i * 9.5, y = R.hold.y + 8, here = m && m.up && !m.lost;
+    parts.push(`<rect x="${x}" y="${y}" width="8" height="8" rx="1" ${here ? col(m.hp < 30 ? 'bad' : m.hp < 55 ? 'rust' : 'raise') : str('line', 0.8)}/>`); });
+  if (!hidden('hold')) { const aboard = SYS.filter(id => s.machines[id] && s.machines[id].up && !s.machines[id].lost); lbl(R.hold.x, R.hold.y + 24, aboard.length ? aboard.map(id => SHORT[id]).join(' ') : 'HOLD EMPTY', aboard.length ? 'ink' : 'dim', 5); }
+  // the collar: the lander docked, or below
+  lbl(R.collar.x, R.collar.y - 13, L.lost ? 'NO LANDER' : s.flags.qs_lander_up ? 'LANDER DOCKED' : 'LANDER BELOW', L.lost ? 'bad' : 'dim', 5.5);
+  // the drive: the reactor's cradle, empty once it went down with the first flight
+  lbl(R.drive.x + 26, R.drive.y - 16, s.machines.reactor && s.machines.reactor.up ? 'REACTOR' : 'CRADLE EMPTY', 'dim', 5.5);
+  // name, and the state of her along the bottom
   const fuel = L.lost ? 'no lander' : s.flags.lander_grounded ? 'lander grounded' : `fuel ${s.fuel || 0} flight${s.fuel === 1 ? '' : 's'}${!s.fuel && s.flags.digester ? ' (digester)' : ''}`;
   const orb = s.memo && s.memo['ship.orbit'] ? (s.memo['ship.orbit'].ok === false ? 'orbit held, hull scarred' : 'orbit held') : s.day >= 130 ? 'orbit decaying' : 'orbit stable';
-  parts.push(`<text x="36" y="${H - 14}" font-size="7.5" ${col('dim')}>${s.sleepers} ASLEEP · ${esc(fuel.toUpperCase())} · ${esc(orb.toUpperCase())}</text>`);
-  parts.push(`<text x="36" y="22" font-size="9" letter-spacing=".14em" ${col('ink')}>${esc(String(s.world.ship || 'ARIADNE').toUpperCase())}</text>`);
-  return `<svg class="shipplan" viewBox="0 0 ${W} ${H}" role="img" aria-label="Schematic of the ship" font-family="var(--sans, inherit)">${parts.join('')}</svg>`;
+  parts.push(`<text x="8" y="30" font-size="9" font-weight="800" letter-spacing=".14em" class="sp-l" ${col('ink')}>${esc(String(s.world.ship || 'ARIADNE').toUpperCase())}</text>`);
+  parts.push(`<text x="8" y="176" font-size="7" font-weight="700" class="sp-l" ${col('dim')}>${s.sleepers} ASLEEP · ${esc(fuel.toUpperCase())} · ${esc(orb.toUpperCase())}</text>`);
+  return `<svg class="shipplan" viewBox="0 18 320 164" role="img" aria-label="Plan of the ship, with what is aboard" font-family="var(--sans, inherit)">${parts.join('')}</svg>`;
 };
 })();
