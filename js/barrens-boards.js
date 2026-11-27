@@ -25,16 +25,18 @@ const clue = (s, n) => { if (s.pro && s.pro.p1 && !s.world.zone) s.pro.p1.clues 
 const strip = st => { delete st.look; };
 
 /* =================== 1. aboard the Persephone =================== */
+/* Her rooms on the plan of her class (2026-11-27): the same pixel plan the Ariadne's walk is drawn on (art/walk/plan.webp,
+   greyed: she is twenty years dead), each room where it is in a ship of her build. How they join is as it was. */
 const H = {
-  collar: { name: 'the docking collar', x: 30, y: 84, adj: ['spine'] },
-  spine: { name: 'the spine', x: 95, y: 84, adj: ['collar', 'bridge', 'tanks', 'relay'], lx: -2, ly: 18 },
-  bridge: { name: 'the bridge', x: 95, y: 26, adj: ['spine', 'cabin'], ly: -12 },
-  cabin: { name: 'a cabin', x: 175, y: 26, adj: ['bridge'], ly: -12 },
-  tanks: { name: 'the fuel tanks', x: 95, y: 144, adj: ['spine', 'stores'] },
-  relay: { name: 'the relay room', x: 165, y: 84, adj: ['spine', 'stores', 'hold'], ly: -12 },
-  stores: { name: 'the stores', x: 175, y: 144, adj: ['tanks', 'relay', 'bay'] },
-  bay: { name: 'the shuttle bay', x: 260, y: 144, adj: ['stores', 'hold'] },
-  hold: { name: 'cargo hold two', x: 260, y: 84, adj: ['relay', 'bay'], ly: -12 },
+  collar: { name: 'the docking collar', x: 261, y: 92, adj: ['spine'], ly: -10 },
+  spine: { name: 'the spine', x: 215, y: 101, adj: ['collar', 'bridge', 'tanks', 'relay'], ly: 16 },
+  bridge: { name: 'the bridge', x: 295, y: 101, adj: ['spine', 'cabin'], ly: 16 },
+  cabin: { name: 'a cabin', x: 238, y: 50, adj: ['bridge'], ly: -9 },
+  tanks: { name: 'the fuel tanks', x: 118, y: 122, adj: ['spine', 'stores'], ly: 15 },
+  relay: { name: 'the relay room', x: 200, y: 76, adj: ['spine', 'stores', 'hold'], ly: -9 },
+  stores: { name: 'the stores', x: 180, y: 113, adj: ['tanks', 'relay', 'bay'], ly: 15 },
+  bay: { name: 'the shuttle bay', x: 118, y: 80, adj: ['stores', 'hold'], ly: -9 },
+  hold: { name: 'cargo hold two', x: 140, y: 101, adj: ['relay', 'bay'], ly: 16 },
 };
 const AIR = 60, STEP = 5, HEAVY = 2, CUT = 10, CARRY = 2, WAKE_TURN = 8, FOLLOW = 0.5;
 const SEAL = 'hold|relay', edge = (a, b) => [a, b].sort().join('|');
@@ -108,9 +110,9 @@ LF.PUZZLES.hulk = {
     const costs = go.map(id => { const r = H[id], m = cost(pz, pz.at, id), dx = r.x - here.x, dy = r.y - here.y, l = Math.hypot(dx, dy) || 1;
       return `<text class="cost" x="${Math.round((here.x + r.x) / 2 - dy / l * 8)}" y="${Math.round((here.y + r.y) / 2 + dx / l * 8 + 3)}">${m}m${edge(pz.at, id) === SEAL && !pz.cut ? ' cut' : ''}</text>`; }).join('');
     const nodes = Object.entries(H).map(([id, r]) => { const can = go.includes(id), cls = [id === pz.at ? 'at' : '', pz.seen.includes(id) ? 'seen' : '', can ? 'go' : ''].filter(Boolean).join(' ');
-      return `<g class="${cls}"${can ? ` data-act="pz" data-v="${id}" role="button" aria-label="Go to ${r.name}"` : ''}>${can ? `<circle class="hit" cx="${r.x}" cy="${r.y}" r="20"/><circle class="ring" cx="${r.x}" cy="${r.y}" r="12"/>` : ''}<circle cx="${r.x}" cy="${r.y}" r="${id === pz.at ? 11 : 8}"/><text x="${r.x + (r.lx || 0)}" y="${r.y + (r.ly || 18) + ((r.ly || 18) > 0 ? 3 : 0)}">${r.name.replace(/^the /, '')}</text></g>`; }).join('');
+      return `<g class="${cls}"${can ? ` data-act="pz" data-v="${id}" role="button" aria-label="Go to ${r.name}"` : ''}>${can ? `<circle class="hit" cx="${r.x}" cy="${r.y}" r="11"/><circle class="ring" cx="${r.x}" cy="${r.y}" r="9"/>` : ''}<circle cx="${r.x}" cy="${r.y}" r="${id === pz.at ? 7 : 5}"/>${can || id === pz.at ? `<text x="${r.x + (r.lx || 0)}" y="${r.y + (r.ly || 18) + ((r.ly || 18) > 0 ? 3 : 0)}">${r.name.replace(/^the /, '')}</text>` : ''}</g>`; }).join('');   // named only where they are and can go, as on the walk
     const air = Math.max(0, pz.air), b = back(pz), carry = pz.load.length ? pz.load.map(x => ({ stores: 'a crate of stores', crates: 'the hold\'s crates', shuttle: 'her shuttle' })[x]).join(', ') : 'nothing';
-    return { svg: `<svg viewBox="0 0 300 168" role="img" aria-label="The Persephone, compartment by compartment">${lines.join('')}${costs}${nodes}</svg>`,
+    return { svg: `<svg viewBox="0 34 320 138" role="img" aria-label="The Persephone, compartment by compartment"><image href="art/walk/plan.webp" x="0" y="0" width="320" height="213" class="plan dead"/>${lines.join('')}${costs}${nodes}</svg>`, pic: `art/walk/persephone/${pz.at}.webp`, picAlt: H[pz.at].name,
       stats: [['time', `${air} minutes of air${pz.done ? '' : ` · ${b} back to the collar`}`], ['parts', `Carrying ${carry}${pz.pumped ? ', and her fuel' : ''}`], ['unknown', `${pz.clues} found`]],
       bar: [air, pz.air0, air - b < 10], log: pz.log, heard: pz.heard };
   },
